@@ -24,7 +24,6 @@ def _normalizar_url(url: str) -> str:
     query = [(k, v) for k, v in parse_qsl(partes.query) if k != "pgbouncer"]
     return urlunsplit(partes._replace(scheme="postgresql+psycopg2", query=urlencode(query)))
 
-
 # Pooler en modo transacción (puerto 6543): conexiones de la aplicación.
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres@localhost:5432/postgres")
 # Pooler en modo sesión (puerto 5432): creación/migración del esquema.
