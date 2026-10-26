@@ -16,11 +16,13 @@ def _normalizar_url(url: str) -> str:
     """Adapta una URL de Supabase para SQLAlchemy + psycopg2.
 
     `pgbouncer=true` es un parámetro de Prisma que psycopg2 no reconoce, así que
-    se elimina de la query string.
+    se elimina de la query string. El esquema se fuerza a `postgresql+psycopg2`
+    porque es el único driver instalado (en Vercel la URL puede llegar como
+    `postgres://` o `postgresql+psycopg://`).
     """
-    partes = urlsplit(url)
+    partes = urlsplit(url.strip().strip('"').strip("'"))
     query = [(k, v) for k, v in parse_qsl(partes.query) if k != "pgbouncer"]
-    return urlunsplit(partes._replace(query=urlencode(query)))
+    return urlunsplit(partes._replace(scheme="postgresql+psycopg2", query=urlencode(query)))
 
 
 # Pooler en modo transacción (puerto 6543): conexiones de la aplicación.
