@@ -1,0 +1,45 @@
+{# Campos de latitud/longitud de una ubicación. Espera `ubicacion` (opcional)
+   y `columnas` (clase de columna Bootstrap para cada campo, opcional). #}
+{% set col = columnas | default("") %}
+<div class="{{ col }}">
+    <label class="form-label" for="latitud">Latitud</label>
+    <input type="text" inputmode="decimal" id="latitud" name="latitud" class="form-control"
+           placeholder="Ej: 4.628015"
+           value="{{ ubicacion.latitud if ubicacion and ubicacion.latitud is not none else '' }}">
+</div>
+<div class="{{ col }}">
+    <label class="form-label" for="longitud">Longitud</label>
+    <input type="text" inputmode="decimal" id="longitud" name="longitud" class="form-control"
+           placeholder="Ej: -74.064870"
+           value="{{ ubicacion.longitud if ubicacion and ubicacion.longitud is not none else '' }}">
+</div>
+<div class="{{ col }}">
+    <button type="button" class="btn btn-outline-primary w-100" id="usarGpsBtn">📍 Usar mi ubicación actual</button>
+    <div class="form-text" id="usarGpsEstado">Opcional. Párate en el lugar y toca el botón, o copia las coordenadas desde OpenStreetMap.</div>
+</div>
+<script>
+    // Llena latitud/longitud con el GPS del dispositivo (requiere HTTPS o localhost).
+    (function () {
+        const boton = document.getElementById("usarGpsBtn");
+        const estado = document.getElementById("usarGpsEstado");
+        boton.addEventListener("click", () => {
+            if (!("geolocation" in navigator) || !window.isSecureContext) {
+                estado.textContent = "Tu navegador no permite leer la ubicación aquí (se necesita HTTPS).";
+                return;
+            }
+            boton.disabled = true;
+            estado.textContent = "Obteniendo ubicación…";
+            navigator.geolocation.getCurrentPosition((pos) => {
+                document.getElementById("latitud").value = pos.coords.latitude.toFixed(6);
+                document.getElementById("longitud").value = pos.coords.longitude.toFixed(6);
+                estado.textContent = `Listo (precisión ±${Math.round(pos.coords.accuracy)} m).`;
+                boton.disabled = false;
+            }, (err) => {
+                estado.textContent = err.code === err.PERMISSION_DENIED
+                    ? "Permiso de ubicación denegado. Actívalo en la configuración del navegador."
+                    : "No se pudo obtener la ubicación. Verifica que el GPS esté activado.";
+                boton.disabled = false;
+            }, { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 });
+        });
+    })();
+</script>

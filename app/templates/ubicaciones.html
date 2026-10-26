@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}Ubicaciones · Portal Escolar{% endblock %}
+
+{% block content %}
+<section class="app-card anim-fade-up">
+    <div class="page-header">
+        <div>
+            <span class="page-header__eyebrow">Campus</span>
+            <h1>Ubicaciones</h1>
+            <p>Encuentra la ubicación de cada espacio escolar.</p>
+        </div>
+        <div class="breadcrumbs">
+            <a href="{{ url_for('index.index') }}">← Inicio</a>
+            <a href="{{ url_for('rutas.rutas_editor') }}">✏️ Editor de rutas</a>
+            <a href="{{ url_for('estudiantes.estudiantes_page') }}">Estudiantes →</a>
+        </div>
+    </div>
+
+    {% if error %}
+    <div class="alert alert-danger" role="alert">{{ error }}</div>
+    {% endif %}
+
+    <div class="form-panel">
+        <div class="form-panel__title">➕ Agregar ubicación</div>
+        <form method="post" class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label">Nombre</label>
+                <input type="text" name="nombre" class="form-control" placeholder="Nombre de la ubicación" required>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Descripción</label>
+                <input type="text" name="descripcion" class="form-control" placeholder="Descripción (opcional)">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Acción (botón del mapa)</label>
+                <select name="accion" class="form-select">
+                    <option value="">Sin acción</option>
+                    {% for valor, etiqueta in botones_mapa %}
+                    <option value="{{ valor }}">{{ etiqueta }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% with columnas="col-md-3" %}{% include "_coordenadas_campos.html" %}{% endwith %}
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary w-100">Agregar</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="table-card">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Descripción</th>
+                        <th>Acción (mapa)</th>
+                        <th>Coordenadas</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ubicacion in ubicaciones %}
+                    <tr>
+                        <td>#{{ ubicacion.id }}</td>
+                        <td>{{ ubicacion.nombre }}</td>
+                        <td>{{ ubicacion.descripcion or "—" }}</td>
+                        <td>{{ botones_mapa_labels.get(ubicacion.accion, "—") if ubicacion.accion else "—" }}</td>
+                        <td>
+                            {% if ubicacion.latitud is not none and ubicacion.longitud is not none %}
+                            {{ "%.6f"|format(ubicacion.latitud) }}, {{ "%.6f"|format(ubicacion.longitud) }}
+                            {% else %}—{% endif %}
+                        </td>
+                        <td class="d-flex gap-2">
+                            <a href="{{ url_for('ubicaciones.ubicaciones_editar', ubicacion_id=ubicacion.id) }}" class="btn btn-sm btn-outline-primary">✏️ Editar</a>
+                            <form method="post" action="{{ url_for('ubicaciones.ubicacion_eliminar', ubicacion_id=ubicacion.id) }}" onsubmit="return confirm('¿Eliminar la ubicación {{ ubicacion.nombre }}?');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">🗑️ Eliminar</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="6" class="text-center">No hay ubicaciones registradas.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Editar pregunta · Portal Escolar{% endblock %}
+
+{% block content %}
+<section class="app-card anim-fade-up" style="max-width: 620px; width: 100%; margin: 0 auto;">
+    <div class="page-header">
+        <div>
+            <span class="page-header__eyebrow">Editar</span>
+            <h1>Editar pregunta</h1>
+        </div>
+        <div class="breadcrumbs">
+            <a href="{{ url_for('preguntas.preguntas_page') }}">← Preguntas</a>
+        </div>
+    </div>
+
+    {% if error %}
+    <div class="alert alert-danger" role="alert">{{ error }}</div>
+    {% endif %}
+
+    <form method="post" class="d-flex flex-column gap-3">
+        <div>
+            <label class="form-label" for="materia_id">Materia</label>
+            <select id="materia_id" name="materia_id" class="form-select" required>
+                {% for materia in materias %}
+                <option value="{{ materia.id }}" {% if pregunta.materia_id == materia.id %}selected{% endif %}>{{ materia.nombre }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label class="form-label" for="dificultad">Dificultad (1 = fácil, 5 = difícil)</label>
+            <select id="dificultad" name="dificultad" class="form-select" required>
+                {% for nivel in niveles %}
+                <option value="{{ nivel }}" {% if pregunta.dificultad == nivel %}selected{% endif %}>Nivel {{ nivel }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label class="form-label" for="enunciado">Enunciado</label>
+            <textarea id="enunciado" name="enunciado" class="form-control" rows="3" required>{{ pregunta.enunciado }}</textarea>
+        </div>
+        <div>
+            <label class="form-label" for="respuesta">Respuesta correcta (opcional)</label>
+            <textarea id="respuesta" name="respuesta" class="form-control" rows="3">{{ pregunta.respuesta or "" }}</textarea>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="activa" id="activa" {% if pregunta.activa %}checked{% endif %}>
+            <label class="form-check-label" for="activa">Pregunta activa</label>
+        </div>
+        <div class="d-flex gap-2 mt-2">
+            <button type="submit" class="btn btn-primary">💾 Guardar</button>
+            <a href="{{ url_for('preguntas.preguntas_page') }}" class="btn btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</section>
+{% endblock %}

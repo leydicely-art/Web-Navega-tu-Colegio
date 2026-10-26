@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Cursos · Portal Escolar{% endblock %}
+
+{% block content %}
+<section class="app-card anim-fade-up">
+    <div class="page-header">
+        <div>
+            <span class="page-header__eyebrow">Gestión académica</span>
+            <h1>Cursos</h1>
+            <p>Explora los cursos del colegio y sus grupos.</p>
+        </div>
+        <div class="breadcrumbs">
+            <a href="{{ url_for('index.index') }}">← Inicio</a>
+            <a href="{{ url_for('estudiantes.estudiantes_page') }}">Estudiantes →</a>
+        </div>
+    </div>
+
+    {% if error %}
+    <div class="alert alert-danger" role="alert">{{ error }}</div>
+    {% endif %}
+
+    <div class="form-panel">
+        <div class="form-panel__title">➕ Agregar curso</div>
+        <form method="post" class="row g-3 align-items-end">
+            <div class="col-sm-4">
+                <label class="form-label">Nombre</label>
+                <input type="text" name="nombre" class="form-control" placeholder="Nombre del curso" required>
+            </div>
+            <div class="col-sm-5">
+                <label class="form-label">Descripción</label>
+                <input type="text" name="descripcion" class="form-control" placeholder="Descripción (opcional)">
+            </div>
+            <div class="col-sm-3">
+                <button type="submit" class="btn btn-primary w-100">Agregar</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="table-card">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Descripción</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for curso in cursos %}
+                    <tr>
+                        <td>#{{ curso.id }}</td>
+                        <td>{{ curso.nombre }}</td>
+                        <td>{{ curso.descripcion or "—" }}</td>
+                        <td class="d-flex gap-2">
+                            <a href="{{ url_for('cursos.curso_editar', curso_id=curso.id) }}" class="btn btn-sm btn-outline-primary">✏️ Editar</a>
+                            <form method="post" action="{{ url_for('cursos.curso_eliminar', curso_id=curso.id) }}" onsubmit="return confirm('¿Eliminar el curso {{ curso.nombre }}?');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">🗑️ Eliminar</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="4" class="text-center">No hay cursos registrados.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endblock %}

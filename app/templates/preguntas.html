@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Preguntas · Portal Escolar{% endblock %}
+
+{% block content %}
+<section class="app-card anim-fade-up">
+    <div class="page-header">
+        <div>
+            <span class="page-header__eyebrow">Gestión académica</span>
+            <h1>Banco de preguntas</h1>
+            <p>Sube preguntas por materia y asígnales un nivel de dificultad del 1 al 5.</p>
+        </div>
+        <div class="breadcrumbs">
+            <a href="{{ url_for('index.index') }}">← Inicio</a>
+            <a href="{{ url_for('materias.materias_page') }}">Materias →</a>
+        </div>
+    </div>
+
+    {% if error %}
+    <div class="alert alert-danger" role="alert">{{ error }}</div>
+    {% endif %}
+
+    <div class="form-panel">
+        <div class="form-panel__title">➕ Agregar pregunta</div>
+        <form method="post">
+            <div class="row g-3">
+                <div class="col-sm-4">
+                    <label class="form-label">Materia</label>
+                    <select name="materia_id" class="form-select" required>
+                        <option value="">Elige una materia</option>
+                        {% for materia in materias %}
+                        <option value="{{ materia.id }}">{{ materia.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-sm-4">
+                    <label class="form-label">Dificultad (1 = fácil, 5 = difícil)</label>
+                    <select name="dificultad" class="form-select" required>
+                        {% for nivel in niveles %}
+                        <option value="{{ nivel }}" {% if nivel == 1 %}selected{% endif %}>Nivel {{ nivel }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-sm-4 d-flex align-items-end">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="activa" id="activa" checked>
+                        <label class="form-check-label" for="activa">Pregunta activa</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-3 mt-1">
+                <div class="col-12">
+                    <label class="form-label">Enunciado</label>
+                    <textarea name="enunciado" class="form-control" rows="2" placeholder="Escribe la pregunta" required></textarea>
+                </div>
+                <div class="col-12">
+                    <label class="form-label">Respuesta correcta (opcional)</label>
+                    <textarea name="respuesta" class="form-control" rows="2" placeholder="Respuesta esperada"></textarea>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">Agregar</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="form-panel">
+        <div class="form-panel__title">🔎 Filtrar</div>
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-sm-4">
+                <label class="form-label">Materia</label>
+                <select name="materia_id" class="form-select">
+                    <option value="">Todas</option>
+                    {% for materia in materias %}
+                    <option value="{{ materia.id }}" {% if filtro_materia == materia.id %}selected{% endif %}>{{ materia.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-sm-4">
+                <label class="form-label">Dificultad</label>
+                <select name="dificultad" class="form-select">
+                    <option value="">Todas</option>
+                    {% for nivel in niveles %}
+                    <option value="{{ nivel }}" {% if filtro_dificultad == nivel %}selected{% endif %}>Nivel {{ nivel }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-sm-4 d-flex gap-2">
+                <button type="submit" class="btn btn-outline-primary">Aplicar</button>
+                <a href="{{ url_for('preguntas.preguntas_page') }}" class="btn btn-outline-secondary">Limpiar</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="table-card">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Materia</th>
+                        <th>Enunciado</th>
+                        <th>Respuesta</th>
+                        <th>Dificultad</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pregunta in preguntas %}
+                    <tr>
+                        <td>#{{ pregunta.id }}</td>
+                        <td>{{ pregunta.materia.nombre if pregunta.materia else "—" }}</td>
+                        <td>{{ pregunta.enunciado }}</td>
+                        <td>{{ pregunta.respuesta or "—" }}</td>
+                        <td>Nivel {{ pregunta.dificultad }}</td>
+                        <td>{{ "Activa" if pregunta.activa else "Inactiva" }}</td>
+                        <td class="d-flex gap-2">
+                            <a href="{{ url_for('preguntas.pregunta_editar', pregunta_id=pregunta.id) }}" class="btn btn-sm btn-outline-primary">✏️ Editar</a>
+                            <form method="post" action="{{ url_for('preguntas.pregunta_eliminar', pregunta_id=pregunta.id) }}" onsubmit="return confirm('¿Eliminar esta pregunta?');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">🗑️ Eliminar</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="7" class="text-center">No hay preguntas registradas.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endblock %}

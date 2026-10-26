@@ -1,0 +1,185 @@
+{# Marcado del minijuego "Rugido Salvaje": compartido entre juego.html (página
+   completa, con header/sidebar) y juego_embed.html (versión sin chrome para
+   el <iframe> de la pestaña Aventura del asistente). Toda la lógica vive en
+   app/static/game/*.js; este parcial solo declara los nodos que esos módulos
+   esperan encontrar por id. #}
+<div class="rs-stage" id="gameStage">
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- HUD (vida, monedas/gemas, zona, habilidades, minimapa) -->
+    <div class="rs-hud" id="hud" hidden>
+        <div class="rs-hud__top-left">
+            <div class="rs-health">
+                <div class="rs-health__bar"><div class="rs-health__fill" id="hudHealthFill"></div></div>
+                <span class="rs-health__text" id="hudHealthText">100 / 100</span>
+            </div>
+            <div class="rs-wallet">
+                <span>🪙 <strong id="hudCoins">0</strong></span>
+                <span>💎 <strong id="hudGems">0</strong></span>
+            </div>
+        </div>
+
+        <div class="rs-hud__top-center">
+            <strong id="hudZoneName">Sabana Dorada</strong>
+            <small id="hudWaveInfo">Oleada 1 / 3</small>
+            <small id="hudPoison" hidden>☠️ Envenenado — busca la cruz roja ✚ en el mapa</small>
+        </div>
+
+        <canvas class="rs-minimap" id="hudMinimap" width="130" height="90"></canvas>
+
+        <div class="rs-abilities">
+            <div class="rs-ability" id="hudDashBar" title="Salto felino (Espacio / Shift)">💨</div>
+            <div class="rs-ability" id="hudRoarBar" title="Rugido (E)">📣</div>
+        </div>
+    </div>
+
+    <!-- Pantalla de inicio -->
+    <div class="rs-screen" id="screenStart">
+        <div class="rs-panel rs-panel--title">
+            <h1 class="rs-title">🦁 Rugido Salvaje</h1>
+            <p class="rs-subtitle">Un león errante recorre territorios peligrosos para recuperar lo que le pertenece.</p>
+            <div class="rs-menu-actions">
+                <button type="button" class="rs-btn rs-btn--primary" id="btnPlay">▶ Jugar</button>
+                <button type="button" class="rs-btn" id="btnUpgradesOpen">⭐ Mejoras</button>
+            </div>
+            <div class="rs-controls">
+                <strong>Controles</strong>
+                <span>WASD / Flechas — moverse</span>
+                <span>Click — zarpazo a distancia (apunta con el mouse)</span>
+                <span>Espacio / Shift — salto felino</span>
+                <span>E — rugido (empuja, aturde y arranca arbustos)</span>
+                <span>Esc / P — pausa</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mejoras permanentes (gemas, persisten entre partidas) -->
+    <div class="rs-screen" id="screenUpgrades" hidden>
+        <div class="rs-panel">
+            <h2>⭐ Mejoras permanentes</h2>
+            <p class="rs-subtitle">Gemas disponibles: 💎 <strong id="upgradesGems">0</strong></p>
+            <div class="rs-list" id="upgradesList"></div>
+            <button type="button" class="rs-btn" id="btnUpgradesBack">← Volver</button>
+        </div>
+    </div>
+
+    <!-- Introducción de zona -->
+    <div class="rs-screen" id="screenIntro" hidden>
+        <div class="rs-panel">
+            <span class="rs-eyebrow">Nueva zona</span>
+            <h2 id="introZoneName">Sabana Dorada</h2>
+            <p id="introZoneDesc"></p>
+            <button type="button" class="rs-btn rs-btn--primary" id="btnIntroContinue">Adelante →</button>
+        </div>
+    </div>
+
+    <!-- Pausa -->
+    <div class="rs-screen" id="screenPause" hidden>
+        <div class="rs-panel">
+            <h2>⏸ Pausa</h2>
+            <div class="rs-menu-actions">
+                <button type="button" class="rs-btn rs-btn--primary" id="btnResume">▶ Continuar</button>
+                <button type="button" class="rs-btn" id="btnRestartFromPause">🔁 Reiniciar partida</button>
+                <button type="button" class="rs-btn rs-btn--ghost" id="btnExitFromPause">🚪 Salir al menú</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tienda entre niveles (monedas de la partida) -->
+    <div class="rs-screen" id="screenShop" hidden>
+        <div class="rs-panel">
+            <span class="rs-eyebrow">Zona superada</span>
+            <h2>🛒 Campamento</h2>
+            <p class="rs-subtitle">Monedas disponibles: 🪙 <strong id="shopCoins">0</strong></p>
+            <div class="rs-list" id="shopList"></div>
+            <button type="button" class="rs-btn rs-btn--primary" id="btnShopContinue">Continuar a <span id="shopZoneNext"></span> →</button>
+        </div>
+    </div>
+
+    <!-- Derrota -->
+    <div class="rs-screen" id="screenGameOver" hidden>
+        <div class="rs-panel">
+            <h2>💀 El león ha caído</h2>
+            <div class="rs-stats" id="gameOverStats"></div>
+            <div class="rs-menu-actions">
+                <button type="button" class="rs-btn rs-btn--primary" id="btnRetry">🔁 Reintentar</button>
+                <button type="button" class="rs-btn" id="btnMenuFromGameOver">🚪 Menú</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Victoria -->
+    <div class="rs-screen" id="screenVictory" hidden>
+        <div class="rs-panel">
+            <h2>🏆 ¡El territorio es tuyo!</h2>
+            <div class="rs-stats" id="victoryStats"></div>
+            <div class="rs-menu-actions">
+                <button type="button" class="rs-btn rs-btn--primary" id="btnPlayAgain">🔁 Jugar de nuevo</button>
+                <button type="button" class="rs-btn" id="btnMenuFromVictory">🚪 Menú</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alerta de reto rápido -->
+    <div class="rs-screen" id="screenRapidAlert" hidden>
+        <div class="rs-panel rs-panel--rapid-alert">
+            <span class="rs-eyebrow">⚡ Nuevo reto</span>
+            <h2 id="rapidAlertTitle">Nuevo reto disponible</h2>
+            <p id="rapidAlertText">¡Hay un nuevo reto disponible! ¿Quieres aceptarlo ahora?</p>
+            <div class="rs-menu-actions">
+                <button type="button" class="rs-btn rs-btn--primary" id="btnRapidAccept">Aceptar reto</button>
+                <button type="button" class="rs-btn" id="btnRapidReject">Rechazar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Minijuego rápido -->
+    <div class="rs-screen" id="screenRapidChallenge" hidden>
+        <div class="rs-panel rs-panel--rapid-challenge">
+            <div class="rapid-challenge__header">
+                <span class="rs-eyebrow">⚡ Reto rápido</span>
+                <strong id="rapidChallengeTimer">10s</strong>
+            </div>
+            <h2 id="rapidChallengeTitle">Reto</h2>
+            <p id="rapidChallengeInstruction">Completa la prueba.</p>
+            <div id="rapidChallengeBody" class="rapid-challenge__body"></div>
+            <div id="rapidChallengeFeedback" class="rapid-challenge__feedback" aria-live="polite"></div>
+            <div id="rapidChallengeResult" class="rapid-challenge__result" hidden></div>
+            <div class="rs-menu-actions rapid-challenge__actions">
+                <button type="button" class="rs-btn rs-btn--primary" id="rapidChallengeSubmit">Enviar</button>
+                <button type="button" class="rs-btn" id="rapidChallengeCancel">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Desafío educativo -->
+    <div class="rs-screen" id="screenChallenge" hidden>
+        <div class="rs-panel rs-panel--challenge" id="challengePanel">
+            <div class="challenge-reaction" id="challengeReaction" aria-live="polite" aria-atomic="true"></div>
+
+            <span class="rs-eyebrow">🦁 Reto educativo</span>
+
+            <h2 id="challengeTitle">Desafío del colegio</h2>
+
+            <p id="challengeQuestion">
+                Responde correctamente para recuperar un fragmento.
+            </p>
+
+            <div class="rs-list" id="challengeOptions"></div>
+
+            <p id="challengeFeedback" role="status" aria-live="polite"></p>
+
+            <div id="challengeInfo" hidden></div>
+
+            <button
+                type="button"
+                class="rs-btn rs-btn--primary"
+                id="btnChallengeContinue"
+                hidden
+            >
+                Continuar →
+            </button>
+        </div>
+    </div>
+</div>
+

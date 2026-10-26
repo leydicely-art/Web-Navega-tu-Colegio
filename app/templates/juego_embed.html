@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Rugido Salvaje</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='game/game.css') }}">
+
+    <style>
+        /* Versión "embebida" de Rugido Salvaje: pensada para vivir dentro del
+           <iframe> de la pestaña Aventura del asistente, sin el header/sidebar
+           del portal (ver .rs-stage en game.css, pensado para la página
+           completa con su propio cálculo de alto respecto al header). */
+        html, body { height: 100%; margin: 0; background: #14100c; }
+        .rs-stage { height: 100%; min-height: 0; border-radius: 0; }
+    </style>
+</head>
+<body>
+
+{% include "_juego_stage.html" %}
+
+<script type="module" src="{{ url_for('static', filename='game/main.js') }}"></script>
+</body>
+</html>

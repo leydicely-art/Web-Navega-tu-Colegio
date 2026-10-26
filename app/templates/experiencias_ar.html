@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Experiencias AR · Portal Escolar{% endblock %}
+
+{% block content %}
+<section class="app-card anim-fade-up">
+    <div class="page-header">
+        <div>
+            <span class="page-header__eyebrow">Modo AR</span>
+            <h1>Experiencias AR</h1>
+            <p>Personajes 3D activados por QR: cada uno se asocia a una ubicación del campus.</p>
+        </div>
+        <div class="breadcrumbs">
+            <a href="{{ url_for('index.index') }}">← Inicio</a>
+            <a href="{{ url_for('ar.demo_page', slug='biblioteca') }}">🧪 Ver ejemplo (biblioteca)</a>
+            <a href="{{ url_for('ar.ar_page') }}" class="d-none" hidden>📷 Probar Modo AR →</a>
+        </div>
+    </div>
+
+    {% if error %}
+    <div class="alert alert-danger" role="alert">{{ error }}</div>
+    {% endif %}
+
+    {% if not ubicaciones %}
+    <div class="alert alert-danger" role="alert">
+        Primero necesitas al menos una <a href="{{ url_for('ubicaciones.ubicaciones_page') }}">ubicación</a> para poder crear una experiencia AR.
+    </div>
+    {% endif %}
+
+    <div class="form-panel">
+        <div class="form-panel__title">➕ Agregar experiencia AR</div>
+        <form method="post" class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label">Personaje</label>
+                <input type="text" name="nombre_personaje" class="form-control" placeholder="Nombre del personaje" required>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Ubicación</label>
+                <select name="ubicacion_id" class="form-select" required>
+                    <option value="" selected disabled>Selecciona…</option>
+                    {% for ubicacion in ubicaciones %}
+                    <option value="{{ ubicacion.id }}">{{ ubicacion.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Modelo 3D (.glb)</label>
+                <input type="text" name="modelo_url" class="form-control" placeholder="/static/models/personaje.glb (opcional)">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Escala</label>
+                <input type="number" step="0.1" min="0.1" name="escala" class="form-control" value="1.0">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Diálogo al interactuar</label>
+                <input type="text" name="dialogo" class="form-control" placeholder="Lo que dice al tocarlo (opcional)">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Sonido</label>
+                <input type="text" name="sonido_url" class="form-control" placeholder="/static/sounds/saludo.mp3 (opcional)">
+            </div>
+            <div class="col-md-12">
+                <button type="submit" class="btn btn-primary">Agregar experiencia</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="table-card">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>QR</th>
+                        <th>Personaje</th>
+                        <th>Ubicación</th>
+                        <th>Modelo</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for experiencia in experiencias %}
+                    <tr>
+                        <td>#{{ experiencia.id }}</td>
+                        <td>
+                            <a href="{{ url_for('ar.experiencia_qr', experiencia_id=experiencia.id) }}" target="_blank" title="Descargar QR para imprimir">
+                                <img src="{{ url_for('ar.experiencia_qr', experiencia_id=experiencia.id) }}" alt="QR de {{ experiencia.nombre_personaje }}" width="56" height="56" style="border-radius:6px; border:1px solid var(--c-border);">
+                            </a>
+                        </td>
+                        <td>{{ experiencia.nombre_personaje }}</td>
+                        <td>{{ experiencia.ubicacion.nombre if experiencia.ubicacion else "—" }}</td>
+                        <td>{{ experiencia.modelo_url or "— (placeholder)" }}</td>
+                        <td>
+                            {% if experiencia.activo %}
+                            <span class="badge" style="background: var(--c-green);">Activa</span>
+                            {% else %}
+                            <span class="badge" style="background: var(--c-text-soft);">Inactiva</span>
+                            {% endif %}
+                        </td>
+                        <td class="d-flex gap-2">
+                            <a href="{{ url_for('ar.experiencias_editar', experiencia_id=experiencia.id) }}" class="btn btn-sm btn-outline-primary">✏️ Editar</a>
+                            <form method="post" action="{{ url_for('ar.experiencia_eliminar', experiencia_id=experiencia.id) }}" onsubmit="return confirm('¿Eliminar la experiencia de {{ experiencia.nombre_personaje }}? El QR impreso dejará de funcionar.');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">🗑️ Eliminar</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="7" class="text-center">Todavía no hay experiencias AR registradas.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endblock %}

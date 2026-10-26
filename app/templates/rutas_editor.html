@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Editor de rutas · Portal Escolar{% endblock %}
+
+{% block extra_head %}
+{% include "_leaflet_css.html" %}
+<link rel="stylesheet" href="{{ url_for('static', filename='rutas/rutas.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="app-card anim-fade-up rutas rutas-editor">
+    <div class="page-header">
+        <div>
+            <span class="page-header__eyebrow">Campus</span>
+            <h1>✏️ Editor de rutas</h1>
+            <p>Dibuja los recorridos internos: puntos (pasillos, escaleras, salones) y los tramos que los unen.</p>
+        </div>
+        <div class="breadcrumbs">
+            <a href="{{ url_for('rutas.rutas_page') }}">🧭 Probar «Cómo llegar»</a>
+        </div>
+    </div>
+
+    <div class="rutas-editor__barra" role="toolbar" aria-label="Herramientas">
+        <div class="rutas-editor__modos" role="group" aria-label="Modo">
+            <button type="button" class="rutas-icono" data-modo="seleccionar" aria-pressed="true" aria-label="Seleccionar y mover" title="Seleccionar y mover">✋</button>
+            <button type="button" class="rutas-icono" data-modo="agregar" aria-pressed="false" aria-label="Agregar punto" title="Agregar punto">➕</button>
+            <button type="button" class="rutas-icono" data-modo="conectar" aria-pressed="false" aria-label="Conectar puntos" title="Conectar puntos">🔗</button>
+        </div>
+        <button type="button" class="rutas-icono" id="editorPisoNuevo" aria-label="Agregar piso" title="Agregar piso">🏢</button>
+        <button type="button" class="rutas-icono rutas-icono--danger" id="editorPisoEliminar" aria-label="Eliminar piso" title="Eliminar piso">🗑️</button>
+        <button type="button" class="rutas-icono" id="editorAjustes" aria-label="Ajustes del mapa" title="Ajustes del mapa">⚙️</button>
+        <button type="button" class="rutas-icono" id="editorEjemplo" aria-label="Cargar red de ejemplo" title="Cargar red de ejemplo" hidden>✨</button>
+        <span class="rutas-editor__ayuda" id="editorAyuda" role="status" aria-live="polite"></span>
+    </div>
+
+    <div class="rutas-cuerpo">
+        <div class="rutas-mapa-zona">
+            <div class="rutas-mapa" id="editorMapa" role="region" aria-label="Mapa de la red de recorridos"></div>
+        </div>
+
+        <aside class="rutas-editor__panel" id="editorPanel" aria-live="polite">
+            <div class="rutas-editor__vacio" id="editorVacio">
+                <p><strong>Cómo se arma la red</strong></p>
+                <ol>
+                    <li><b>➕ Agregar punto</b> y toca el mapa en cada cruce de pasillos, puerta, escalera y salón.</li>
+                    <li>Vincula los salones/oficinas a una <a href="{{ url_for('ubicaciones.ubicaciones_page') }}">ubicación</a> para que se puedan buscar.</li>
+                    <li><b>🔗 Conectar</b>: toca dos puntos para unirlos con un tramo caminable.</li>
+                    <li>Para cambiar de piso, conecta la escalera (o ascensor) de un piso con la del otro: elige la primera, cambia de piso y toca la segunda.</li>
+                    <li>Agrega fotos a los puntos y tramos: se muestran en el paso a paso.</li>
+                </ol>
+                <p class="text-muted small mb-0"><b>✋</b> selecciona y arrastra puntos · <b>🏢</b> agrega un piso · <b>⚙️</b> ajustes del mapa (vista inicial, límite y planos).</p>
+            </div>
+
+            <form class="rutas-editor__form" id="editorNodoForm" hidden data-sin-carga>
+                <h2 class="rutas-editor__titulo" id="editorNodoTitulo">Punto</h2>
+                <label class="form-label" for="nodoNombre">Nombre <small class="text-muted">(opcional si tiene ubicación)</small></label>
+                <input class="form-control form-control-sm" id="nodoNombre" maxlength="100">
+
+                <div class="row g-2">
+                    <div class="col-8">
+                        <label class="form-label" for="nodoTipo">Tipo</label>
+                        <select class="form-select form-select-sm" id="nodoTipo"></select>
+                    </div>
+                    <div class="col-4">
+                        <label class="form-label" for="nodoPiso">Piso</label>
+                        <input class="form-control form-control-sm" id="nodoPiso" type="number" min="-5" max="50" step="1">
+                    </div>
+                </div>
+
+                <label class="form-label" for="nodoUbicacion">Ubicación vinculada</label>
+                <select class="form-select form-select-sm" id="nodoUbicacion"></select>
+
+                <label class="form-label" for="nodoDescripcion">Descripción</label>
+                <input class="form-control form-control-sm" id="nodoDescripcion" maxlength="255" placeholder="Ej: puerta azul al final del pasillo">
+
+                <label class="form-label" for="nodoFoto">Foto de referencia</label>
+                <div class="rutas-editor__foto" data-foto-para="nodo"></div>
+
+                <div class="rutas-editor__acciones">
+                    <button type="submit" class="btn btn-primary btn-sm">💾 Guardar</button>
+                    <button type="button" class="btn btn-outline-danger btn-sm" id="nodoEliminar">🗑️ Eliminar</button>
+                    <a class="btn btn-outline-secondary btn-sm" id="nodoQr" target="_blank" rel="noopener">QR</a>
+                </div>
+
+                <h3 class="rutas-editor__subtitulo">Conexiones</h3>
+                <ul class="rutas-editor__conexiones" id="nodoConexiones"></ul>
+            </form>
+
+            <form class="rutas-editor__form" id="editorTramoForm" hidden data-sin-carga>
+                <h2 class="rutas-editor__titulo" id="editorTramoTitulo">Tramo</h2>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="tramoAccesible">
+                    <label class="form-check-label" for="tramoAccesible">♿ Accesible en silla de ruedas</label>
+                </div>
+                <label class="form-label" for="tramoInstruccion">Indicación propia <small class="text-muted">(si la dejas vacía se genera sola)</small></label>
+                <input class="form-control form-control-sm" id="tramoInstruccion" maxlength="255" placeholder="Ej: Cruza la puerta de vidrio y sigue por el pasillo">
+                <label class="form-label">Foto del tramo</label>
+                <div class="rutas-editor__foto" data-foto-para="tramo"></div>
+                <div class="rutas-editor__acciones">
+                    <button type="submit" class="btn btn-primary btn-sm">💾 Guardar</button>
+                    <button type="button" class="btn btn-outline-danger btn-sm" id="tramoEliminar">🗑️ Eliminar tramo</button>
+                    <button type="button" class="btn btn-link btn-sm" id="tramoVolver">‹ Volver al punto</button>
+                </div>
+            </form>
+
+            <form class="rutas-editor__form" id="editorAjustesForm" hidden data-sin-carga>
+                <h2 class="rutas-editor__titulo">⚙️ Ajustes del mapa</h2>
+                <p class="text-muted small mb-1">Se guardan en la base de datos. Mueve y acerca el mapa a la zona del colegio antes de usar los botones.</p>
+
+                <h3 class="rutas-editor__subtitulo">Vista inicial</h3>
+                <p class="small mb-1" id="ajustesVista"></p>
+                <button type="button" class="btn btn-outline-primary btn-sm" id="ajustesUsarVista">📌 Usar la vista actual como inicial</button>
+
+                <h3 class="rutas-editor__subtitulo">Límite del mapa</h3>
+                <p class="small mb-1" id="ajustesLimite"></p>
+                <div class="rutas-editor__acciones mt-0">
+                    <button type="button" class="btn btn-outline-primary btn-sm" id="ajustesLimitar">🔒 Limitar a la vista actual</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" id="ajustesQuitarLimite">Quitar límite</button>
+                </div>
+
+                <h3 class="rutas-editor__subtitulo" id="ajustesPisoTitulo">Piso</h3>
+                <label class="form-label" for="pisoNombre">Nombre del piso</label>
+                <input class="form-control form-control-sm" id="pisoNombre" maxlength="100">
+                <label class="form-label" for="pisoPlano">Plano del piso <small class="text-muted">(imagen que se pone sobre el mapa)</small></label>
+                <div class="rutas-editor__foto" data-foto-para="plano"></div>
+                <div class="rutas-editor__acciones">
+                    <button type="submit" class="btn btn-primary btn-sm">💾 Guardar piso</button>
+                    <button type="button" class="btn btn-outline-primary btn-sm" id="ajustesReajustarPlano">📐 Reajustar plano a la vista</button>
+                    <button type="button" class="btn btn-outline-danger btn-sm" id="ajustesQuitarPlano">Quitar plano</button>
+                    <button type="button" class="btn btn-link btn-sm" id="ajustesCerrar">Cerrar</button>
+                </div>
+            </form>
+        </aside>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+{% include "_leaflet_js.html" %}
+<script src="{{ url_for('static', filename='rutas/rutas-comun.js') }}"></script>
+<script src="{{ url_for('static', filename='rutas/rutas-editor.js') }}"></script>
+{% endblock %}

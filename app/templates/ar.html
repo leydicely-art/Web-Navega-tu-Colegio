@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}Modo AR · Portal Escolar{% endblock %}
+
+{% block extra_head %}
+<!-- jsQR: decodifica códigos QR desde los frames de la cámara. Solo se usa en el modo
+     simulado (sin WebXR) para personalizar al león si el usuario apunta a un QR del
+     colegio; ya no hace falta para que el león aparezca. Se carga como script clásico
+     (no como módulo) para exponer window.jsQR, que ar.js consume. -->
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+
+<!-- Import map: desde three@0.160, los módulos de ejemplo (GLTFLoader,
+     XREstimatedLight...) importan "three" como referencia "pelada" (sin URL),
+     esperando que el documento la resuelva. Debe declararse antes que
+     cualquier <script type="module"> que la use (incluido ar.js, más abajo). -->
+<script type="importmap">
+{
+    "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    }
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<section class="app-card anim-fade-up ar-card">
+
+    <div class="map-mode-toggle" role="group" aria-label="Forma de explorar el campus">
+        <a class="map-mode-toggle__option" href="{{ url_for('index.index') }}">🗺️ Mapa</a>
+        <span class="map-mode-toggle__option is-active" aria-current="page">📷 Modo AR</span>
+    </div>
+
+    <div class="page-header">
+        <div>
+            <span class="page-header__eyebrow">Campus</span>
+            <h1>Modo AR</h1>
+            <p>Activa la cámara y apunta al código QR del colegio: en cuanto lo reconozca, tu guía León aparecerá anclado al espacio real frente a ti y te contará sobre ese lugar.</p>
+        </div>
+    </div>
+
+    <div class="ar-stage" id="arStage">
+        <video id="arVideo" class="ar-stage__video" autoplay muted playsinline hidden></video>
+        <canvas id="arOverlay" class="ar-stage__overlay"></canvas>
+        <canvas id="arQrCanvas" hidden></canvas>
+
+        <span class="ar-mode-badge" id="arModeBadge" hidden></span>
+        <button type="button" class="ar-reubicar-btn" id="arReubicarBtn" hidden>🔄 Reubicar</button>
+        <button type="button" class="ar-torch-btn" id="arTorchBtn" hidden>🔦 Luz</button>
+
+        <!-- Botón flotante de voz: permite preguntarle al chatbot sin salir de
+             la cámara ni escribir. Se muestra solo mientras la cámara/AR está
+             activa (ver mostrarVoiceFab en ar.js) y responde solo por audio,
+             leyendo la respuesta con la misma síntesis de voz que usa León. -->
+        <button type="button" class="ar-voice-fab" id="arVoiceFab" aria-label="Preguntarle al asistente por voz" hidden>
+            <span class="ar-voice-fab__icon" id="arVoiceFabIcon">🎤</span>
+        </button>
+
+        <!-- Al otro lado del micrófono: escanear un nuevo QR sin pasar por el
+             panel de abajo, para reubicar a León en otro punto (ver
+             escanearNuevoQR en ar.js). Misma visibilidad que el micrófono. -->
+        <button type="button" class="ar-scan-fab" id="arScanFab" aria-label="Escanear un nuevo código QR y reubicar a León" hidden>📷</button>
+
+        <div class="ar-scan-tools" id="arScanTools">
+            <div class="ar-qr-tooltip" id="arQrTooltip" hidden>
+                <span class="ar-qr-tooltip__label">📋 Texto leído del QR</span>
+                <code id="arQrTooltipText" class="ar-qr-tooltip__text"></code>
+                <button type="button" class="ar-qr-tooltip__close" id="arQrTooltipClose" aria-label="Cerrar">✕</button>
+            </div>
+            <div class="ar-hud" id="arHud" hidden></div>
+            <form class="ar-manual" id="arManualForm" hidden>
+                <input type="text" id="arManualInput" class="ar-manual__input" placeholder="Pega el enlace o código del QR" autocomplete="off" />
+                <button type="submit" class="btn btn-primary btn-sm">Usar</button>
+            </form>
+            <button type="button" class="ar-manual-toggle" id="arManualToggle" hidden>✏️ ¿Sigue sin leerlo? Ingresarlo a mano</button>
+        </div>
+
+        <div class="ar-error" id="arError" hidden>
+            <span class="ar-error__icon">⚠️</span>
+            <p id="arErrorText"></p>
+            <code id="arErrorDetail" class="ar-error__detail" hidden></code>
+            <a href="{{ url_for('index.index') }}" class="btn btn-secondary btn-sm">Volver al mapa</a>
+        </div>
+
+        <!-- Se muestra solo si el navegador soporta WebXR AR real pero la
+             "activación" del tap en "Activar cámara" ya expiró mientras se
+             resolvía el QR (ver intentarXRConActivacion en ar.js): un toque
+             más, bien pegado en el tiempo al pedido de sesión, alcanza para
+             recuperarla. -->
+        <div class="ar-xr-confirm" id="arXrConfirm" hidden>
+            <span class="ar-start__icon">🟢</span>
+            <p>Encontramos AR real para este dispositivo. Tocá para anclar a León al mundo real.</p>
+            <button type="button" class="btn btn-primary" id="arXrConfirmBtn">Anclar en AR real</button>
+        </div>
+    </div>
+
+    <div class="ar-panel" id="arPanel" hidden>
+        <div class="ar-panel__header">
+            <strong id="arPanelNombre"></strong>
+            <span id="arPanelUbicacion" class="text-muted small"></span>
+        </div>
+        <p id="arPanelDialogo" class="ar-panel__dialogo" hidden></p>
+        <span id="arPanelAudio" class="ar-panel__audio" hidden>🔊 Hablando…</span>
+        <div class="ar-panel__actions">
+            <button type="button" class="btn btn-outline-primary btn-sm" id="arInteractBtn">✋ Interactuar</button>
+            <button type="button" class="btn btn-secondary btn-sm" id="arRescanBtn">📷 Escanear otro QR</button>
+        </div>
+    </div>
+
+    <p class="ar-hint">
+        León no aparece solo: primero hay que reconocer un código QR del colegio (probá con el
+        <a href="{{ url_for('ar.demo_page', slug='biblioteca') }}">ejemplo de la biblioteca</a>). En Android/WebXR eso
+        significa abrir el enlace del QR (escaneado con la cámara del sistema) antes de activar la cámara aquí; en
+        iPhone y navegadores sin WebXR, basta con apuntar la cámara de esta página al QR. Recién después de reconocer
+        el QR se pide buscar una superficie (suelo o mesa) donde anclarlo, en los dispositivos con AR real.
+    </p>
+
+    <p class="ar-hint">
+        En dispositivos Android compatibles con WebXR, León se ancla a una superficie real detectada (suelo o mesa):
+        puedes rodearlo en 360° y mantiene su lugar. En iPhone y navegadores sin ese soporte se usa una versión
+        simulada: León se coloca frente a ti y la escena responde al girar el teléfono, pero sin anclaje real de
+        mundo ni oclusión por objetos. La oclusión y las sombras dinámicas dependen del hardware de cada equipo.
+    </p>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script type="module" src="{{ url_for('static', filename='ar.js') }}"></script>
+{% endblock %}

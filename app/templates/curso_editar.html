@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Editar curso · Portal Escolar{% endblock %}
+
+{% block content %}
+<section class="app-card anim-fade-up" style="max-width: 620px; width: 100%; margin: 0 auto;">
+    <div class="page-header">
+        <div>
+            <span class="page-header__eyebrow">Editar</span>
+            <h1>Editar curso</h1>
+        </div>
+        <div class="breadcrumbs">
+            <a href="{{ url_for('cursos.cursos_page') }}">← Cursos</a>
+        </div>
+    </div>
+
+    {% if error %}
+    <div class="alert alert-danger" role="alert">{{ error }}</div>
+    {% endif %}
+
+    <form method="post" class="d-flex flex-column gap-3">
+        <div>
+            <label class="form-label" for="nombre">Nombre</label>
+            <input type="text" id="nombre" name="nombre" class="form-control" value="{{ curso.nombre }}" required>
+        </div>
+        <div>
+            <label class="form-label" for="descripcion">Descripción</label>
+            <input type="text" id="descripcion" name="descripcion" class="form-control" value="{{ curso.descripcion or '' }}">
+        </div>
+        <div class="d-flex gap-2 mt-2">
+            <button type="submit" class="btn btn-primary">💾 Guardar</button>
+            <a href="{{ url_for('cursos.cursos_page') }}" class="btn btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</section>
+{% endblock %}

@@ -1,0 +1,60 @@
+{% macro horario_campos(dias_semana, dia_slugs, salones=[], horarios_por_dia={}) %}
+<div class="table-card">
+    <table class="table table-sm align-middle mb-0">
+        <thead>
+            <tr>
+                <th>Día</th>
+                <th>Inicio</th>
+                <th>Fin</th>
+                <th>Salón</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for dia in dias_semana %}
+            {% set slug = dia_slugs[dia] %}
+            {% set horario = horarios_por_dia.get(dia) %}
+
+            <tr>
+                <td>{{ dia }}</td>
+
+                <td>
+                    <input
+                        type="time"
+                        name="horario_{{ slug }}_inicio"
+                        class="form-control form-control-sm"
+                        value="{{ horario.hora_inicio.strftime('%H:%M') if horario else '' }}">
+                </td>
+
+                <td>
+                    <input
+                        type="time"
+                        name="horario_{{ slug }}_fin"
+                        class="form-control form-control-sm"
+                        value="{{ horario.hora_fin.strftime('%H:%M') if horario else '' }}">
+                </td>
+
+                <td>
+                    <select
+                        name="horario_{{ slug }}_salon_id"
+                        class="form-select form-select-sm">
+
+                        <option value="">Sin salón</option>
+
+                        {% for salon in salones %}
+                        <option
+                            value="{{ salon.id }}"
+                            {% if horario and horario.salon_id == salon.id %}selected{% endif %}>
+                            {{ salon.nombre }}
+                        </option>
+                        {% endfor %}
+
+                    </select>
+                </td>
+            </tr>
+
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endmacro %}

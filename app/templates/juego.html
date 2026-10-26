@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Rugido Salvaje · Portal Escolar{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='game/game.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<section class="app-card anim-fade-up" style="padding:0; overflow:hidden;">
+    {% include "_juego_stage.html" %}
+</section>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script type="module" src="{{ url_for('static', filename='game/main.js') }}"></script>
+{% endblock %}

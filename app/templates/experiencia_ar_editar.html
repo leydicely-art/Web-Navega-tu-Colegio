@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Editar experiencia AR · Portal Escolar{% endblock %}
+
+{% block content %}
+<section class="app-card anim-fade-up" style="max-width: 640px; width: 100%; margin: 0 auto;">
+    <div class="page-header">
+        <div>
+            <span class="page-header__eyebrow">Editar</span>
+            <h1>Editar experiencia AR</h1>
+        </div>
+        <div class="breadcrumbs">
+            <a href="{{ url_for('ar.experiencias_page') }}">← Experiencias AR</a>
+        </div>
+    </div>
+
+    {% if error %}
+    <div class="alert alert-danger" role="alert">{{ error }}</div>
+    {% endif %}
+
+    <div class="d-flex align-items-center gap-3 mb-3">
+        <img src="{{ url_for('ar.experiencia_qr', experiencia_id=experiencia.id) }}" alt="QR de {{ experiencia.nombre_personaje }}" width="96" height="96" style="border-radius:8px; border:1px solid var(--c-border);">
+        <div>
+            <div class="text-muted small">Este QR ya está impreso: cambiar los datos de abajo no lo invalida.</div>
+            <a href="{{ url_for('ar.experiencia_qr', experiencia_id=experiencia.id) }}" download="qr-{{ experiencia.token }}.png" class="btn btn-sm btn-outline-primary mt-1">⬇️ Descargar QR</a>
+        </div>
+    </div>
+
+    <form method="post" class="d-flex flex-column gap-3">
+        <div>
+            <label class="form-label" for="nombre_personaje">Personaje</label>
+            <input type="text" id="nombre_personaje" name="nombre_personaje" class="form-control" value="{{ experiencia.nombre_personaje }}" required>
+        </div>
+        <div>
+            <label class="form-label" for="ubicacion_id">Ubicación</label>
+            <select id="ubicacion_id" name="ubicacion_id" class="form-select" required>
+                {% for ubicacion in ubicaciones %}
+                <option value="{{ ubicacion.id }}" {% if ubicacion.id == experiencia.ubicacion_id %}selected{% endif %}>{{ ubicacion.nombre }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label class="form-label" for="modelo_url">Modelo 3D (.glb)</label>
+            <input type="text" id="modelo_url" name="modelo_url" class="form-control" value="{{ experiencia.modelo_url or '' }}" placeholder="/static/models/personaje.glb (opcional)">
+        </div>
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label" for="escala">Escala</label>
+                <input type="number" step="0.1" min="0.1" id="escala" name="escala" class="form-control" value="{{ experiencia.escala }}">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label" for="animacion_inicial">Animación al aparecer</label>
+                <input type="text" id="animacion_inicial" name="animacion_inicial" class="form-control" value="{{ experiencia.animacion_inicial }}">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label" for="animacion_interaccion">Animación al tocarlo</label>
+                <input type="text" id="animacion_interaccion" name="animacion_interaccion" class="form-control" value="{{ experiencia.animacion_interaccion or '' }}">
+            </div>
+        </div>
+        <div>
+            <label class="form-label" for="sonido_url">Sonido</label>
+            <input type="text" id="sonido_url" name="sonido_url" class="form-control" value="{{ experiencia.sonido_url or '' }}" placeholder="/static/sounds/saludo.mp3 (opcional)">
+        </div>
+        <div>
+            <label class="form-label" for="dialogo">Diálogo al interactuar</label>
+            <textarea id="dialogo" name="dialogo" class="form-control" rows="3">{{ experiencia.dialogo or "" }}</textarea>
+        </div>
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="activo" name="activo" {% if experiencia.activo %}checked{% endif %}>
+            <label class="form-check-label" for="activo">Experiencia activa (desmárcalo para invalidar el QR sin reimprimirlo)</label>
+        </div>
+        <div class="d-flex gap-2 mt-2">
+            <button type="submit" class="btn btn-primary">💾 Guardar cambios</button>
+            <a href="{{ url_for('ar.experiencias_page') }}" class="btn btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</section>
+{% endblock %}

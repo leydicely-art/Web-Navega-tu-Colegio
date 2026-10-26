@@ -1,0 +1,1411 @@
+{% extends "base.html" %}
+
+{% block title %}Inicio · Portal Escolar{% endblock %}
+
+{% block extra_head %}
+<!-- Pannellum: librería ligera (sin dependencias) para renderizar fotos panorámicas de 360°. -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css">
+{% endblock %}
+
+{% block content %}
+
+<section class="app-card anim-fade-up">
+
+    <nav class="campus-map" id="campusMap" aria-label="Mapa del colegio">
+
+        <div class="campus-map__intro" id="campusIntro" role="button" tabindex="0"
+             aria-label="Video de presentación del colegio. Haz clic para ver el mapa.">
+            <video class="campus-map__intro-video" id="campusIntroVideo"
+                   src="{{ url_for('images', filename='video.mp4') }}"
+                   autoplay muted loop playsinline preload="auto"></video>
+            <div class="campus-map__intro-overlay">
+                <span class="campus-map__intro-icon" aria-hidden="true">▶</span>
+                <span class="campus-map__intro-text">Haz clic para ver el mapa del colegio</span>
+            </div>
+        </div>
+
+        <video class="campus-map__img" src="{{ url_for('images', filename='mapa.mp4') }}"
+               autoplay muted loop playsinline preload="auto"
+               aria-label="Mapa del colegio: cancha de fútbol, parques infantiles y bloques de primaria a la izquierda; al centro el compuesto principal con el Bloque D (Ubicaciones), Rectoría y Secretaría, laboratorios, Bloque C (Cursos), salas especializadas y Bloque B (Profesores); abajo el Auditorio (Cronograma), Bloque A (Estudiantes) y la entrada principal sobre la Carrera 8; a la derecha la Calle 15A."></video>
+
+
+        <!-- Cancha de Fútbol -->
+<button type="button" class="campus-hotspot"
+        style="left:3%; top:4%; width:27%; height:20%;"
+        data-bs-toggle="modal"
+        data-bs-target="#canchaFutbolModal"
+        aria-label="Cancha de Fútbol">
+
+    <span class="campus-popover" role="tooltip">
+        <strong>Cancha de Fútbol</strong>
+        <span>Descubre curiosidades sobre este lugar.</span>
+        <em>Ver curiosidades →</em>
+    </span>
+
+</button>
+
+<!-- Entrada principal -->
+<button
+    type="button"
+    class="campus-hotspot"
+    style="left:50%; top:91%;"
+    data-bs-toggle="modal"
+    data-bs-target="#entradaModal">
+
+    <span class="campus-popover" role="tooltip">
+        <strong>Entrada principal</strong>
+        <span>Conoce la entrada y la historia de nuestro colegio.</span>
+        <em>Ver curiosidades →</em>
+    </span>
+
+</button>
+
+<!-- Cancha de Baloncesto -->
+<button type="button" class="campus-hotspot"
+        style="left:34%; top:20%; width:35%; height:19%;"
+        data-bs-toggle="modal"
+        data-bs-target="#baloncestoModal"
+        aria-label="Cancha de Baloncesto">
+
+    <span class="campus-popover" role="tooltip">
+        <strong>Cancha de Baloncesto</strong>
+        <span>Descubre curiosidades sobre este lugar.</span>
+        <em>Ver curiosidades →</em>
+    </span>
+
+</button>
+
+<!-- Polifuncional -->
+<button type="button" class="campus-hotspot"
+        style="left:0.8%; top:21%; width:28%; height:23%;"
+        data-bs-toggle="modal"
+        data-bs-target="#polifuncionalModal"
+        aria-label="Polifuncional">
+
+    <span class="campus-popover" role="tooltip">
+        <strong>Polifuncional</strong>
+        <span>Descubre curiosidades sobre este lugar.</span>
+        <em>Ver curiosidades →</em>
+    </span>
+
+</button>
+
+        <!-- Primaria -->
+        <button type="button" class="campus-hotspot" style="left:5.1%; top:50%; width:18.5%; height:11.1%;"
+                data-bs-toggle="modal" data-bs-target="#primariaModal" aria-label="Primaria">
+            <span class="campus-popover" role="tooltip">
+                <strong>Primaria</strong>
+                <span>Descubre curiosidades sobre este lugar.</span>
+                <em>Ver curiosidades →</em>
+            </span>
+        </button>
+
+        <!-- Coordinación Primaria (Auditorio) -->
+        <button type="button" class="campus-hotspot" style="left:4.6%; top:63.9%; width:15.7%; height:13.6%;"
+                data-bs-toggle="modal" data-bs-target="#coordinacionPrimariaModal" aria-label="Coordinación Primaria · Auditorio">
+            <span class="campus-popover" role="tooltip">
+                <strong>Coordinación Primaria</strong>
+                <span>Descubre curiosidades sobre este lugar.</span>
+                <em>Ver curiosidades →</em>
+            </span>
+        </button>
+
+        <!-- Parque Infantil -->
+        <button type="button" class="campus-hotspot" style="left:4.6%; top:77.1%; width:9.3%; height:12.5%;"
+                data-bs-toggle="modal" data-bs-target="#parqueInfantilModal" aria-label="Parque Infantil">
+            <span class="campus-popover" role="tooltip">
+                <strong>Parque Infantil</strong>
+                <span>Descubre curiosidades sobre este lugar.</span>
+                <em>Ver curiosidades →</em>
+            </span>
+        </button>
+
+       <!-- Biblioteca, Secretaría y Rectoría -->
+<button type="button" class="campus-hotspot"
+        style="left:36%; top:1%; width:30%; height:21%;"
+        data-bs-toggle="modal"
+        data-bs-target="#bibliotecaModal"
+        aria-label="Biblioteca, Secretaría y Rectoría">
+
+    <span class="campus-popover" role="tooltip">
+        <strong>Biblioteca, Secretaría y Rectoría</strong>
+        <span>Información general de este espacio.</span>
+        <em>Ver información →</em>
+    </span>
+
+</button>
+
+        <!-- Bloque D -->
+<button type="button" class="campus-hotspot"
+        style="left:64.1%; top:22.6%; width:15.1%; height:12.4%;"
+        data-bs-toggle="modal"
+        data-bs-target="#bloqueDModal"
+        aria-label="Bloque D">
+
+    <span class="campus-popover" role="tooltip">
+        <strong>Bloque D</strong>
+        <span>Descubre curiosidades sobre este bloque.</span>
+        <em>Ver curiosidades →</em>
+    </span>
+
+</button>
+
+       <!-- Bloque C -->
+<button type="button" class="campus-hotspot"
+        style="left:36.1%; top:34%; width:25.9%; height:13.3%;"
+        data-bs-toggle="modal"
+        data-bs-target="#bloqueCModal"
+        aria-label="Bloque C">
+
+    <span class="campus-popover" role="tooltip">
+        <strong>Bloque C</strong>
+        <span>Descubre curiosidades sobre este bloque.</span>
+        <em>Ver curiosidades →</em>
+    </span>
+
+</button>
+
+        <!-- Bloque B -->
+        <button type="button" class="campus-hotspot" style="left:35.9%; top:61.8%; width:13%; height:13.2%;"
+                data-bs-toggle="modal" data-bs-target="#bloqueBModal" aria-label="Bloque B">
+            <span class="campus-popover" role="tooltip">
+                <strong>Bloque B</strong>
+                <span>Descubre curiosidades sobre este bloque.</span>
+                <em>Ver curiosidades →</em>
+            </span>
+        </button>
+
+<!-- Bloque A -->
+<button type="button"
+        class="campus-hotspot"
+        style="left:63%; top:62%; width:20%; height:14%;"
+        data-bs-toggle="modal"
+        data-bs-target="#bloqueAModal"
+        aria-label="Bloque A">
+
+    <span class="campus-popover" role="tooltip">
+        <strong>Bloque A</strong>
+        <span>Descubre curiosidades sobre este bloque.</span>
+        <em>Ver curiosidades →</em>
+    </span>
+
+</button>
+
+<!-- Laboratorio de Física y Química -->
+<button type="button"
+        class="campus-hotspot"
+        style="left:38%; top:58%; width:18%; height:14%;"
+        data-bs-toggle="modal"
+        data-bs-target="#laboratorioModal"
+        aria-label="Laboratorio de Física y Química">
+
+    <span class="campus-popover" role="tooltip">
+        <strong>Laboratorio de Física y Química</strong>
+        <span>Descubre curiosidades sobre este espacio.</span>
+        <em>Ver curiosidades →</em>
+    </span>
+
+</button>
+
+        <!-- Aulas Especializadas -->
+        <button type="button" class="campus-hotspot" style="left:63.9%; top:81.3%; width:15.3%; height:10.4%;"
+                data-bs-toggle="modal" data-bs-target="#aulasEspecializadasModal" aria-label="Aulas Especializadas">
+            <span class="campus-popover" role="tooltip">
+                <strong>Aulas Especializadas</strong>
+                <span>Descubre curiosidades sobre este lugar.</span>
+                <em>Ver curiosidades →</em>
+            </span>
+        </button>
+
+    </nav>
+
+    <a class="campus-map__nav" href="{{ url_for('rutas.rutas_page') }}" aria-label="Ir al mapa de rutas del colegio">
+        <span aria-hidden="true">🧭</span>
+        Ver mapa de rutas
+    </a>
+
+    <div class="campus-legend" aria-hidden="true">
+        <span class="campus-legend__item"><span class="campus-legend__dot" style="background: linear-gradient(160deg, #f4c04e, #d99a2b);"></span>Bloque A · Estudiantes</span>
+        <span class="campus-legend__item"><span class="campus-legend__dot" style="background: linear-gradient(160deg, #5fa8dd, #2f6fa0);"></span>Bloque B · Información</span>
+        <span class="campus-legend__item"><span class="campus-legend__dot" style="background: linear-gradient(160deg, #e2864f, #b85f28);"></span>Bloque C · Información</span>
+        <span class="campus-legend__item"><span class="campus-legend__dot" style="background: linear-gradient(160deg, #4fd6d6, #1fa3a8);"></span>Bloque D · Información</span>
+        <span class="campus-legend__item"><span class="campus-legend__dot" style="background: linear-gradient(160deg, #b183d6, #7e4bab);"></span>Biblioteca · Materias</span>
+        <span class="campus-legend__item"><span class="campus-legend__dot" style="background: linear-gradient(160deg, #e0524f, #b8302c);"></span>Auditorio · Cronograma</span>
+        <span class="campus-legend__item"><span class="campus-legend__dot" style="background: linear-gradient(160deg, #f3ead9, #d8a63a);"></span>Rectoría · Información</span>
+        <span class="campus-legend__item"><span class="campus-legend__dot" style="background: linear-gradient(160deg, #7fd88f, #3fa85a);"></span>Cancha de Fútbol · Información</span>
+        <span class="campus-legend__item"><span class="campus-legend__dot" style="background: linear-gradient(160deg, #f4c04e, #d99a2b);"></span>Primaria · Información</span>
+        <span class="campus-legend__item"><span class="campus-legend__dot" style="background: linear-gradient(160deg, #b183d6, #7e4bab);"></span>Coordinación Primaria · Información</span>
+        <span class="campus-legend__item"><span class="campus-legend__dot" style="background: linear-gradient(160deg, #f2a3b3, #d1637c);"></span>Parque Infantil · Información</span>
+        <span class="campus-legend__item"><span class="campus-legend__dot" style="background: linear-gradient(160deg, #f2a3b3, #d1637c);"></span>Laboratorio de Física y Química · Información</span>
+        <span class="campus-legend__item"><span class="campus-legend__dot" style="background: linear-gradient(160deg, #5fa8dd, #2f6fa0);"></span>Aulas Especializadas · Información</span>
+    </div>
+</section>
+
+{% if proximos_eventos %}
+<section class="app-card anim-fade-up anim-delay-3">
+    <div class="page-header">
+        <div>
+            <span class="page-header__eyebrow">Cronograma</span>
+            <h1 style="font-size: 1.3rem;">Próximas actividades</h1>
+        </div>
+        <a class="breadcrumbs" href="{{ url_for('cronogramas.cronogramas_page') }}">
+            <span style="background: rgba(110,15,31,.06); color: var(--c-primary); font-weight:700; font-size:.82rem; padding:8px 14px; border-radius: 999px;">Ver cronograma completo →</span>
+        </a>
+    </div>
+
+    <div class="stat-grid">
+        {% for evento in proximos_eventos %}
+        <div class="stat-card stat-card--primary">
+            <span class="stat-card__icon">📅</span>
+            <div class="stat-card__label" style="font-size:.95rem; margin-top:6px;">{{ evento.titulo }}</div>
+            <div class="stat-card__label">{{ evento.fecha.strftime('%d/%m/%Y') }} · {{ evento.hora }} · {{ evento.ubicacion.nombre if evento.ubicacion else "Por definir" }}</div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+<!-- Modal de imagen (Biblioteca) — se abre al hacer clic en la Biblioteca del mapa -->
+<div class="modal fade" id="bibliotecaModal" tabindex="-1" aria-labelledby="bibliotecaModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content campus-image-modal">
+            <h2 class="visually-hidden" id="bibliotecaModalLabel">Biblioteca</h2>
+            <button type="button" class="campus-image-modal__close" data-bs-dismiss="modal" aria-label="Cerrar">✕</button>
+            <div class="campus-image-modal__body">
+                <div class="campus-image-modal__gallery" id="bibliotecaGallery">
+                    <div class="campus-image-modal__zoom-wrap" id="bibliotecaZoomWrap">
+                        <div class="campus-image-modal__pano" id="bibliotecaZoomImg" role="img" aria-label="Foto 360° de la Biblioteca del colegio"></div>
+                    </div>
+                    <button type="button" class="campus-image-modal__nav campus-image-modal__nav--prev" aria-label="Imagen anterior">‹</button>
+                    <button type="button" class="campus-image-modal__nav campus-image-modal__nav--next" aria-label="Imagen siguiente">›</button>
+                    <span class="campus-image-modal__gallery-count" id="bibliotecaGalleryCount">1 / 1</span>
+                </div>
+
+                <div class="campus-image-modal__chat">
+                    <div class="campus-image-modal__chat-body" id="bibliotecaChatBody"></div>
+                    <div class="campus-image-modal__chat-actions">
+                        <button type="button" class="chat-chip" id="bibliotecaChatBtn">🎲 Cuéntame otro dato curioso</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de imagen (Bloque D) — se abre al hacer clic en el Bloque D del mapa -->
+<div class="modal fade" id="bloqueDModal" tabindex="-1" aria-labelledby="bloqueDModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content campus-image-modal">
+            <h2 class="visually-hidden" id="bloqueDModalLabel">Bloque D</h2>
+            <button type="button" class="campus-image-modal__close" data-bs-dismiss="modal" aria-label="Cerrar">✕</button>
+            <div class="campus-image-modal__body">
+                <div class="campus-image-modal__gallery" id="bloqueDGallery">
+                    <div class="campus-image-modal__zoom-wrap" id="bloqueDZoomWrap">
+                        <div class="campus-image-modal__pano" id="bloqueDZoomImg" role="img" aria-label="Foto 360° del Bloque D del colegio"></div>
+                    </div>
+                    <button type="button" class="campus-image-modal__nav campus-image-modal__nav--prev" aria-label="Imagen anterior">‹</button>
+                    <button type="button" class="campus-image-modal__nav campus-image-modal__nav--next" aria-label="Imagen siguiente">›</button>
+                    <span class="campus-image-modal__gallery-count" id="bloqueDGalleryCount">1 / 1</span>
+                </div>
+
+                <div class="campus-image-modal__chat">
+                    <div class="campus-image-modal__chat-body" id="bloqueDChatBody"></div>
+                    <div class="campus-image-modal__chat-actions">
+                        <button type="button" class="chat-chip" id="bloqueDChatBtn">🎲 Cuéntame otro dato curioso</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de imagen (Bloque C) — se abre al hacer clic en el Bloque C del mapa -->
+<div class="modal fade" id="bloqueCModal" tabindex="-1" aria-labelledby="bloqueCModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content campus-image-modal">
+            <h2 class="visually-hidden" id="bloqueCModalLabel">Bloque C</h2>
+            <button type="button" class="campus-image-modal__close" data-bs-dismiss="modal" aria-label="Cerrar">✕</button>
+            <div class="campus-image-modal__body">
+                <div class="campus-image-modal__gallery" id="bloqueCGallery">
+                    <div class="campus-image-modal__zoom-wrap" id="bloqueCZoomWrap">
+                        <div class="campus-image-modal__pano" id="bloqueCZoomImg" role="img" aria-label="Foto 360° del Bloque C del colegio"></div>
+                    </div>
+                    <button type="button" class="campus-image-modal__nav campus-image-modal__nav--prev" aria-label="Imagen anterior">‹</button>
+                    <button type="button" class="campus-image-modal__nav campus-image-modal__nav--next" aria-label="Imagen siguiente">›</button>
+                    <span class="campus-image-modal__gallery-count" id="bloqueCGalleryCount">1 / 1</span>
+                </div>
+
+                <div class="campus-image-modal__chat">
+                    <div class="campus-image-modal__chat-body" id="bloqueCChatBody"></div>
+                    <div class="campus-image-modal__chat-actions">
+                        <button type="button" class="chat-chip" id="bloqueCChatBtn">🎲 Cuéntame otro dato curioso</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de imagen (Rectoría y Secretaría) — se abre al hacer clic en Rectoría del mapa -->
+<div class="modal fade" id="rectoriaModal" tabindex="-1" aria-labelledby="rectoriaModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content campus-image-modal">
+            <h2 class="visually-hidden" id="rectoriaModalLabel">Rectoría y Secretaría</h2>
+            <button type="button" class="campus-image-modal__close" data-bs-dismiss="modal" aria-label="Cerrar">✕</button>
+            <div class="campus-image-modal__body">
+                <div class="campus-image-modal__gallery" id="rectoriaGallery">
+                    <div class="campus-image-modal__zoom-wrap" id="rectoriaZoomWrap">
+                        <div class="campus-image-modal__pano" id="rectoriaZoomImg" role="img" aria-label="Foto 360° de Rectoría y Secretaría del colegio"></div>
+                    </div>
+                    <button type="button" class="campus-image-modal__nav campus-image-modal__nav--prev" aria-label="Imagen anterior">‹</button>
+                    <button type="button" class="campus-image-modal__nav campus-image-modal__nav--next" aria-label="Imagen siguiente">›</button>
+                    <span class="campus-image-modal__gallery-count" id="rectoriaGalleryCount">1 / 1</span>
+                </div>
+
+                <div class="campus-image-modal__chat">
+                    <div class="campus-image-modal__chat-body" id="rectoriaChatBody"></div>
+                    <div class="campus-image-modal__chat-actions">
+                        <button type="button" class="chat-chip" id="rectoriaChatBtn">🎲 Cuéntame otro dato curioso</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de imagen (Cancha de Fútbol) -->
+<div class="modal fade" id="canchaFutbolModal" tabindex="-1" aria-labelledby="canchaFutbolModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content campus-image-modal">
+            <h2 class="visually-hidden" id="canchaFutbolModalLabel">Cancha de Fútbol</h2>
+            <button type="button" class="campus-image-modal__close" data-bs-dismiss="modal" aria-label="Cerrar">✕</button>
+            <div class="campus-image-modal__body">
+                <div class="campus-image-modal__gallery" id="canchaFutbolGallery">
+                    <div class="campus-image-modal__zoom-wrap" id="canchaFutbolZoomWrap">
+                        <div class="campus-image-modal__pano" id="canchaFutbolZoomImg" role="img" aria-label="Foto 360° de la Cancha de Fútbol del colegio"></div>
+                    </div>
+                    <button type="button" class="campus-image-modal__nav campus-image-modal__nav--prev" aria-label="Imagen anterior">‹</button>
+                    <button type="button" class="campus-image-modal__nav campus-image-modal__nav--next" aria-label="Imagen siguiente">›</button>
+                    <span class="campus-image-modal__gallery-count" id="canchaFutbolGalleryCount">1 / 1</span>
+                </div>
+
+                <div class="campus-image-modal__chat">
+                    <div class="campus-image-modal__chat-body" id="canchaFutbolChatBody"></div>
+                    <div class="campus-image-modal__chat-actions">
+                        <button type="button" class="chat-chip" id="canchaFutbolChatBtn">🎲 Cuéntame otro dato curioso</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de imagen (Cancha de Baloncesto) -->
+<div class="modal fade" id="baloncestoModal"
+     tabindex="-1"
+     aria-labelledby="baloncestoModalLabel"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+
+        <div class="modal-content campus-image-modal">
+
+            <h2 class="visually-hidden" id="baloncestoModalLabel">
+                Cancha de Baloncesto
+            </h2>
+
+            <button type="button"
+                    class="campus-image-modal__close"
+                    data-bs-dismiss="modal"
+                    aria-label="Cerrar">
+                ✕
+            </button>
+
+            <div class="campus-image-modal__body">
+
+                <div class="campus-image-modal__gallery"
+                     id="baloncestoGallery">
+
+                    <div class="campus-image-modal__zoom-wrap"
+                         id="baloncestoZoomWrap">
+
+                        <div class="campus-image-modal__pano"
+                             id="baloncestoZoomImg"
+                             role="img"
+                             aria-label="Foto 360° de la cancha de baloncesto">
+                        </div>
+
+                    </div>
+
+                    <button type="button"
+                            class="campus-image-modal__nav campus-image-modal__nav--prev"
+                            aria-label="Imagen anterior">
+                        ‹
+                    </button>
+
+                    <button type="button"
+                            class="campus-image-modal__nav campus-image-modal__nav--next"
+                            aria-label="Imagen siguiente">
+                        ›
+                    </button>
+
+                    <span class="campus-image-modal__gallery-count"
+                          id="baloncestoGalleryCount">
+                        1 / 1
+                    </span>
+
+                </div>
+
+                <div class="campus-image-modal__chat">
+
+                    <div class="campus-image-modal__chat-body"
+                         id="baloncestoChatBody">
+                    </div>
+
+                    <div class="campus-image-modal__chat-actions">
+
+                        <button type="button"
+                                class="chat-chip"
+                                id="baloncestoChatBtn">
+                            🎲 Cuéntame otro dato curioso
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- Modal de imagen (Polifuncional) -->
+<div class="modal fade" id="polifuncionalModal"
+     tabindex="-1"
+     aria-labelledby="polifuncionalModalLabel"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+
+        <div class="modal-content campus-image-modal">
+
+            <h2 class="visually-hidden" id="polifuncionalModalLabel">
+                Polifuncional
+            </h2>
+
+            <button type="button"
+                    class="campus-image-modal__close"
+                    data-bs-dismiss="modal"
+                    aria-label="Cerrar">
+                ✕
+            </button>
+
+            <div class="campus-image-modal__body">
+
+                <div class="campus-image-modal__gallery"
+                     id="polifuncionalGallery">
+
+                    <div class="campus-image-modal__zoom-wrap"
+                         id="polifuncionalZoomWrap">
+
+                        <div class="campus-image-modal__pano"
+                             id="polifuncionalZoomImg"
+                             role="img"
+                             aria-label="Foto 360° del Polifuncional del colegio">
+                        </div>
+
+                    </div>
+
+                    <button type="button"
+                            class="campus-image-modal__nav campus-image-modal__nav--prev"
+                            aria-label="Imagen anterior">
+                        ‹
+                    </button>
+
+                    <button type="button"
+                            class="campus-image-modal__nav campus-image-modal__nav--next"
+                            aria-label="Imagen siguiente">
+                        ›
+                    </button>
+
+                    <span class="campus-image-modal__gallery-count"
+                          id="polifuncionalGalleryCount">
+                        1 / 1
+                    </span>
+
+                </div>
+
+                <div class="campus-image-modal__chat">
+
+                    <div class="campus-image-modal__chat-body"
+                         id="polifuncionalChatBody">
+                    </div>
+
+                    <div class="campus-image-modal__chat-actions">
+
+                        <button type="button"
+                                class="chat-chip"
+                                id="polifuncionalChatBtn">
+                            🎲 Cuéntame otro dato curioso
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- Modal de imagen (Primaria) -->
+<div class="modal fade" id="primariaModal" tabindex="-1" aria-labelledby="primariaModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content campus-image-modal">
+            <h2 class="visually-hidden" id="primariaModalLabel">Primaria</h2>
+            <button type="button" class="campus-image-modal__close" data-bs-dismiss="modal" aria-label="Cerrar">✕</button>
+            <div class="campus-image-modal__body">
+                <div class="campus-image-modal__gallery" id="primariaGallery">
+                    <div class="campus-image-modal__zoom-wrap" id="primariaZoomWrap">
+                        <div class="campus-image-modal__pano" id="primariaZoomImg" role="img" aria-label="Foto 360° de los Bloques de Primaria del colegio"></div>
+                    </div>
+                    <button type="button" class="campus-image-modal__nav campus-image-modal__nav--prev" aria-label="Imagen anterior">‹</button>
+                    <button type="button" class="campus-image-modal__nav campus-image-modal__nav--next" aria-label="Imagen siguiente">›</button>
+                    <span class="campus-image-modal__gallery-count" id="primariaGalleryCount">1 / 1</span>
+                </div>
+
+                <div class="campus-image-modal__chat">
+                    <div class="campus-image-modal__chat-body" id="primariaChatBody"></div>
+                    <div class="campus-image-modal__chat-actions">
+                        <button type="button" class="chat-chip" id="primariaChatBtn">🎲 Cuéntame otro dato curioso</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de imagen (Coordinación Primaria / Auditorio) -->
+<div class="modal fade" id="coordinacionPrimariaModal" tabindex="-1" aria-labelledby="coordinacionPrimariaModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content campus-image-modal">
+            <h2 class="visually-hidden" id="coordinacionPrimariaModalLabel">Coordinación Primaria</h2>
+            <button type="button" class="campus-image-modal__close" data-bs-dismiss="modal" aria-label="Cerrar">✕</button>
+            <div class="campus-image-modal__body">
+                <div class="campus-image-modal__gallery" id="coordinacionPrimariaGallery">
+                    <div class="campus-image-modal__zoom-wrap" id="coordinacionPrimariaZoomWrap">
+                        <div class="campus-image-modal__pano" id="coordinacionPrimariaZoomImg" role="img" aria-label="Foto 360° de Coordinación de Primaria y Auditorio del colegio"></div>
+                    </div>
+                    <button type="button" class="campus-image-modal__nav campus-image-modal__nav--prev" aria-label="Imagen anterior">‹</button>
+                    <button type="button" class="campus-image-modal__nav campus-image-modal__nav--next" aria-label="Imagen siguiente">›</button>
+                    <span class="campus-image-modal__gallery-count" id="coordinacionPrimariaGalleryCount">1 / 1</span>
+                </div>
+
+                <div class="campus-image-modal__chat">
+                    <div class="campus-image-modal__chat-body" id="coordinacionPrimariaChatBody"></div>
+                    <div class="campus-image-modal__chat-actions">
+                        <button type="button" class="chat-chip" id="coordinacionPrimariaChatBtn">🎲 Cuéntame otro dato curioso</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de imagen (Parque Infantil) -->
+<div class="modal fade" id="parqueInfantilModal" tabindex="-1" aria-labelledby="parqueInfantilModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content campus-image-modal">
+            <h2 class="visually-hidden" id="parqueInfantilModalLabel">Parque Infantil</h2>
+            <button type="button" class="campus-image-modal__close" data-bs-dismiss="modal" aria-label="Cerrar">✕</button>
+            <div class="campus-image-modal__body">
+                <div class="campus-image-modal__gallery" id="parqueInfantilGallery">
+                    <div class="campus-image-modal__zoom-wrap" id="parqueInfantilZoomWrap">
+                        <div class="campus-image-modal__pano" id="parqueInfantilZoomImg" role="img" aria-label="Foto 360° del Parque Infantil del colegio"></div>
+                    </div>
+                    <button type="button" class="campus-image-modal__nav campus-image-modal__nav--prev" aria-label="Imagen anterior">‹</button>
+                    <button type="button" class="campus-image-modal__nav campus-image-modal__nav--next" aria-label="Imagen siguiente">›</button>
+                    <span class="campus-image-modal__gallery-count" id="parqueInfantilGalleryCount">1 / 1</span>
+                </div>
+
+                <div class="campus-image-modal__chat">
+                    <div class="campus-image-modal__chat-body" id="parqueInfantilChatBody"></div>
+                    <div class="campus-image-modal__chat-actions">
+                        <button type="button" class="chat-chip" id="parqueInfantilChatBtn">🎲 Cuéntame otro dato curioso</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de imagen (Bloque B) -->
+<div class="modal fade" id="bloqueBModal" tabindex="-1" aria-labelledby="bloqueBModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content campus-image-modal">
+            <h2 class="visually-hidden" id="bloqueBModalLabel">Bloque B</h2>
+            <button type="button" class="campus-image-modal__close" data-bs-dismiss="modal" aria-label="Cerrar">✕</button>
+            <div class="campus-image-modal__body">
+                <div class="campus-image-modal__gallery" id="bloqueBGallery">
+                    <div class="campus-image-modal__zoom-wrap" id="bloqueBZoomWrap">
+                        <div class="campus-image-modal__pano" id="bloqueBZoomImg" role="img" aria-label="Foto 360° del Bloque B del colegio"></div>
+                    </div>
+                    <button type="button" class="campus-image-modal__nav campus-image-modal__nav--prev" aria-label="Imagen anterior">‹</button>
+                    <button type="button" class="campus-image-modal__nav campus-image-modal__nav--next" aria-label="Imagen siguiente">›</button>
+                    <span class="campus-image-modal__gallery-count" id="bloqueBGalleryCount">1 / 1</span>
+                </div>
+
+                <div class="campus-image-modal__chat">
+                    <div class="campus-image-modal__chat-body" id="bloqueBChatBody"></div>
+                    <div class="campus-image-modal__chat-actions">
+                        <button type="button" class="chat-chip" id="bloqueBChatBtn">🎲 Cuéntame otro dato curioso</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL ENTRADA -->
+<div class="modal fade" id="entradaModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content campus-modal">
+
+            <div class="modal-header">
+                <h5 class="modal-title">Entrada principal</h5>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Cerrar">
+                </button>
+            </div>
+
+            <div class="modal-body">
+
+                <!-- Imagen 360 -->
+                <div class="campus-360-container">
+                    <img
+                        id="entradaZoomImg"
+                        src="{{ url_for('images', filename='entrada360.png') }}"
+                        alt="Vista 360 de la entrada principal">
+                </div>
+
+                <!-- Datos curiosos -->
+                <div class="campus-facts">
+                    <h5>Datos curiosos</h5>
+
+                    <div id="entradaFact"></div>
+
+                    <button
+                        type="button"
+                        id="entradaNextFact"
+                        class="btn campus-next">
+                        Siguiente →
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Bloque A -->
+<div class="modal fade"
+     id="bloqueAModal"
+     tabindex="-1"
+     aria-labelledby="bloqueAModalLabel"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+
+        <div class="modal-content campus-image-modal">
+
+            <h2 class="visually-hidden" id="bloqueAModalLabel">
+                Bloque A
+            </h2>
+
+            <button type="button"
+                    class="campus-image-modal__close"
+                    data-bs-dismiss="modal"
+                    aria-label="Cerrar">
+                ✕
+            </button>
+
+            <div class="campus-image-modal__body">
+
+                <!-- IMAGEN 360 -->
+                <div class="campus-image-modal__gallery"
+                     id="bloqueAGallery">
+
+                    <div class="campus-image-modal__zoom-wrap"
+                         id="bloqueAZoomWrap">
+
+                        <div class="campus-image-modal__pano"
+                             id="bloqueAZoomImg"
+                             role="img"
+                             aria-label="Imagen 360° del Bloque A">
+                        </div>
+
+                    </div>
+
+                    <button type="button"
+                            class="campus-image-modal__nav campus-image-modal__nav--prev"
+                            aria-label="Imagen anterior">
+                        ‹
+                    </button>
+
+                    <button type="button"
+                            class="campus-image-modal__nav campus-image-modal__nav--next"
+                            aria-label="Imagen siguiente">
+                        ›
+                    </button>
+
+                    <span class="campus-image-modal__gallery-count"
+                          id="bloqueAGalleryCount">
+                        1 / 1
+                    </span>
+
+                </div>
+
+                <!-- DATOS CURIOSOS -->
+                <div class="campus-image-modal__chat">
+
+                    <div class="campus-image-modal__chat-body"
+                         id="bloqueAChatBody">
+                    </div>
+
+                    <div class="campus-image-modal__chat-actions">
+
+                        <button type="button"
+                                class="chat-chip"
+                                id="bloqueAChatBtn">
+                            🎲 Cuéntame otro dato curioso
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- Modal Laboratorio de Física y Química -->
+<div class="modal fade"
+     id="laboratorioModal"
+     tabindex="-1"
+     aria-labelledby="laboratorioModalLabel"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+
+        <div class="modal-content campus-image-modal">
+
+            <h2 class="visually-hidden" id="laboratorioModalLabel">
+                Laboratorio de Física y Química
+            </h2>
+
+            <button type="button"
+                    class="campus-image-modal__close"
+                    data-bs-dismiss="modal"
+                    aria-label="Cerrar">
+                ✕
+            </button>
+
+            <div class="campus-image-modal__body">
+
+                <!-- IMAGEN / 360 -->
+                <div class="campus-image-modal__gallery"
+                     id="laboratorioGallery">
+
+                    <div class="campus-image-modal__zoom-wrap"
+                         id="laboratorioZoomWrap">
+
+                        <div class="campus-image-modal__pano"
+                             id="laboratorioZoomImg"
+                             role="img"
+                             aria-label="Imagen 360° del Laboratorio de Física y Química">
+                        </div>
+
+                    </div>
+
+                    <button type="button"
+                            class="campus-image-modal__nav campus-image-modal__nav--prev"
+                            aria-label="Imagen anterior">
+                        ‹
+                    </button>
+
+                    <button type="button"
+                            class="campus-image-modal__nav campus-image-modal__nav--next"
+                            aria-label="Imagen siguiente">
+                        ›
+                    </button>
+
+                    <span class="campus-image-modal__gallery-count"
+                          id="laboratorioGalleryCount">
+                        1 / 1
+                    </span>
+
+                </div>
+
+                <!-- DATOS CURIOSOS -->
+                <div class="campus-image-modal__chat">
+
+                    <div class="campus-image-modal__chat-body"
+                         id="laboratorioChatBody">
+                    </div>
+
+                    <div class="campus-image-modal__chat-actions">
+
+                        <button type="button"
+                                class="chat-chip"
+                                id="laboratorioChatBtn">
+                            🎲 Cuéntame otro dato curioso
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- Modal de imagen (Aulas Especializadas) -->
+<div class="modal fade" id="aulasEspecializadasModal" tabindex="-1" aria-labelledby="aulasEspecializadasModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content campus-image-modal">
+            <h2 class="visually-hidden" id="aulasEspecializadasModalLabel">Aulas Especializadas</h2>
+            <button type="button" class="campus-image-modal__close" data-bs-dismiss="modal" aria-label="Cerrar">✕</button>
+            <div class="campus-image-modal__body">
+                <div class="campus-image-modal__gallery" id="aulasEspecializadasGallery">
+                    <div class="campus-image-modal__zoom-wrap" id="aulasEspecializadasZoomWrap">
+                        <div class="campus-image-modal__pano" id="aulasEspecializadasZoomImg" role="img" aria-label="Foto 360° de las Aulas Especializadas del colegio"></div>
+                    </div>
+                    <button type="button" class="campus-image-modal__nav campus-image-modal__nav--prev" aria-label="Imagen anterior">‹</button>
+                    <button type="button" class="campus-image-modal__nav campus-image-modal__nav--next" aria-label="Imagen siguiente">›</button>
+                    <span class="campus-image-modal__gallery-count" id="aulasEspecializadasGalleryCount">1 / 1</span>
+                </div>
+
+                <div class="campus-image-modal__chat">
+                    <div class="campus-image-modal__chat-body" id="aulasEspecializadasChatBody"></div>
+                    <div class="campus-image-modal__chat-actions">
+                        <button type="button" class="chat-chip" id="aulasEspecializadasChatBtn">🎲 Cuéntame otro dato curioso</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<!-- Pannellum: librería ligera (sin dependencias) para renderizar fotos panorámicas de 360°. -->
+<script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
+<script>
+    // -- Video de introducción del mapa: al hacer clic (o Enter/Espacio), se oculta el video
+    // con una transición y aparece el mapa interactivo. --
+    (function () {
+        var campusMap = document.getElementById('campusMap');
+        var intro = document.getElementById('campusIntro');
+        var introVideo = document.getElementById('campusIntroVideo');
+        if (!campusMap || !intro) return;
+
+        var revelado = false;
+
+        function mostrarMapa() {
+            if (revelado) return;
+            revelado = true;
+            intro.classList.add('is-hidden');
+            campusMap.classList.add('campus-map--revealed');
+            window.setTimeout(function () {
+                if (introVideo) {
+                    introVideo.pause();
+                }
+            }, 650);
+        }
+
+        intro.addEventListener('click', mostrarMapa);
+        intro.addEventListener('keydown', function (ev) {
+            if (ev.key === 'Enter' || ev.key === ' ' || ev.key === 'Spacebar') {
+                ev.preventDefault();
+                mostrarMapa();
+            }
+        });
+    })();
+
+    // -- Popovers de las zonas del mapa: se reposicionan para no salirse del mapa --
+    // Cada popover aparece centrado sobre su hotspot, pero cerca de los bordes eso lo
+    // corta (el mapa tiene overflow: hidden). Aquí se mide cada uno contra el contenedor
+    // y se desplaza horizontalmente y/o se voltea hacia abajo cuando no cabe.
+    (function () {
+        var campusMap = document.getElementById('campusMap');
+        if (!campusMap) return;
+
+        function ajustarPopovers() {
+            var mapRect = campusMap.getBoundingClientRect();
+            if (!mapRect.width || !mapRect.height) return;
+            var margen = 10;
+
+            campusMap.querySelectorAll('.campus-hotspot').forEach(function (hotspot) {
+                var popover = hotspot.querySelector('.campus-popover');
+                if (!popover) return;
+
+                popover.style.setProperty('--popover-shift-x', '0px');
+                popover.classList.remove('campus-popover--flip');
+
+                var btnRect = hotspot.getBoundingClientRect();
+                var popRect = popover.getBoundingClientRect();
+
+                if (btnRect.top - popRect.height - 14 < mapRect.top) {
+                    popover.classList.add('campus-popover--flip');
+                }
+
+                var centerX = btnRect.left + btnRect.width / 2;
+                var halfAncho = popRect.width / 2;
+                var desplazamiento = 0;
+                var bordeIzq = centerX - halfAncho;
+                var bordeDer = centerX + halfAncho;
+
+                if (bordeIzq < mapRect.left + margen) {
+                    desplazamiento = (mapRect.left + margen) - bordeIzq;
+                } else if (bordeDer > mapRect.right - margen) {
+                    desplazamiento = (mapRect.right - margen) - bordeDer;
+                }
+
+                popover.style.setProperty('--popover-shift-x', desplazamiento + 'px');
+            });
+        }
+
+        ajustarPopovers();
+        window.addEventListener('load', ajustarPopovers);
+
+        var resizeTimeout;
+        window.addEventListener('resize', function () {
+            window.clearTimeout(resizeTimeout);
+            resizeTimeout = window.setTimeout(ajustarPopovers, 120);
+        });
+    })();
+
+    // -- Modales del mapa (Biblioteca, Bloque D, Rectoría, ...): visor 360° + galería + chat de datos curiosos --
+    function initCampusModal(prefix, datosCuriosos, imagenes) {
+        var wrap = document.getElementById(prefix + 'ZoomWrap');
+        var panoEl = document.getElementById(prefix + 'ZoomImg');
+        var modal = document.getElementById(prefix + 'Modal');
+        var chatBody = document.getElementById(prefix + 'ChatBody');
+        var chatBtn = document.getElementById(prefix + 'ChatBtn');
+        if (!wrap || !panoEl || !modal) return;
+
+        // -- Galería: cuando el lugar tiene varias fotos 360°, permite pasar entre ellas --
+        var galleryIndex = 0;
+        var panoViewer = null;
+        var gallery = document.getElementById(prefix + 'Gallery');
+        var prevBtn = gallery ? gallery.querySelector('.campus-image-modal__nav--prev') : null;
+        var nextBtn = gallery ? gallery.querySelector('.campus-image-modal__nav--next') : null;
+        var countEl = document.getElementById(prefix + 'GalleryCount');
+
+        // Con una sola foto 360° se ocultan las flechas y el contador (‹ 1 / N ›).
+        // Con dos o más, la galería queda navegable con las flechas o el teclado.
+        if (gallery) {
+            var tieneVarias = imagenes && imagenes.length > 1;
+            gallery.classList.toggle('campus-image-modal__gallery--single', !tieneVarias);
+        }
+
+        // -- Carga (o recarga) la foto de 360° actual en el visor Pannellum --
+        function cargarPanorama(indice) {
+            if (!imagenes || !imagenes.length) return;
+            galleryIndex = (indice + imagenes.length) % imagenes.length;
+            if (countEl) countEl.textContent = (galleryIndex + 1) + ' / ' + imagenes.length;
+            if (panoViewer) {
+                panoViewer.destroy();
+                panoViewer = null;
+            }
+            panoViewer = window.pannellum.viewer(panoEl.id, {
+                type: 'equirectangular',
+                panorama: imagenes[galleryIndex],
+                autoLoad: true,
+                compass: false,
+                showZoomCtrl: true,
+                showFullscreenCtrl: true,
+                hfov: 100
+            });
+        }
+
+        if (prevBtn) prevBtn.addEventListener('click', function () { cargarPanorama(galleryIndex - 1); });
+        if (nextBtn) nextBtn.addEventListener('click', function () { cargarPanorama(galleryIndex + 1); });
+
+        // Flechas del teclado (‹ / ›) para pasar entre las fotos 360° del lugar.
+        function onKeyNav(ev) {
+            if (!imagenes || imagenes.length < 2) return;
+            if (ev.key === 'ArrowLeft') { ev.preventDefault(); cargarPanorama(galleryIndex - 1); }
+            else if (ev.key === 'ArrowRight') { ev.preventDefault(); cargarPanorama(galleryIndex + 1); }
+        }
+
+        var usados = [];
+
+        function siguienteDato() {
+            if (usados.length >= datosCuriosos.length) usados = [];
+            var restantes = datosCuriosos.filter(function (_, i) { return usados.indexOf(i) === -1; });
+            var elegido = restantes[Math.floor(Math.random() * restantes.length)];
+            usados.push(datosCuriosos.indexOf(elegido));
+            return elegido;
+        }
+
+        // -- Lectura en voz alta: reutiliza el reproductor "nota de voz" del asistente --
+        function detenerVoz() {
+            window.PortalVoice.detenerVoz();
+        }
+
+        function mostrarTyping() {
+            if (!chatBody) return;
+            var typing = document.createElement('div');
+            typing.className = 'chat-msg chat-msg--bot';
+            typing.id = prefix + 'Typing';
+            typing.innerHTML = '<span class="chat-msg__avatar">' + window.PortalMascot.svg('thinking') + '</span>' +
+                '<div class="chat-bubble"><div class="chat-typing"><span></span><span></span><span></span></div></div>';
+            chatBody.appendChild(typing);
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+
+        function crearMensajeBot(texto) {
+            var msg = document.createElement('div');
+            msg.className = 'chat-msg chat-msg--bot';
+
+            var avatar = document.createElement('span');
+            avatar.className = 'chat-msg__avatar';
+            avatar.innerHTML = window.PortalMascot.svg('idle');
+            msg.appendChild(avatar);
+
+            var bubble = document.createElement('div');
+            bubble.className = 'chat-bubble';
+
+            var parrafo = document.createElement('span');
+            parrafo.textContent = texto;
+            bubble.appendChild(parrafo);
+
+            var player = window.PortalVoice.crearVoicePlayer(texto, { autoplay: true });
+            if (player) bubble.appendChild(player);
+
+            msg.appendChild(bubble);
+            return msg;
+        }
+
+        function mostrarDato() {
+            if (!chatBody) return;
+            if (chatBtn) chatBtn.disabled = true;
+            mostrarTyping();
+            window.setTimeout(function () {
+                var typing = document.getElementById(prefix + 'Typing');
+                if (typing) typing.remove();
+
+                var mensaje = crearMensajeBot(siguienteDato());
+                chatBody.appendChild(mensaje);
+                window.PortalMascot.setState(mensaje.querySelector('.mascot'), 'done');
+                chatBody.scrollTop = chatBody.scrollHeight;
+                if (chatBtn) chatBtn.disabled = false;
+            }, 650);
+        }
+
+        modal.addEventListener('shown.bs.modal', function () {
+            cargarPanorama(0);
+            document.addEventListener('keydown', onKeyNav);
+            if (chatBody) chatBody.innerHTML = '';
+            usados = [];
+            mostrarDato();
+        });
+
+        modal.addEventListener('hidden.bs.modal', function () {
+            detenerVoz();
+            document.removeEventListener('keydown', onKeyNav);
+            if (panoViewer) {
+                panoViewer.destroy();
+                panoViewer = null;
+            }
+        });
+
+        if (chatBtn) {
+            chatBtn.addEventListener('click', mostrarDato);
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    //  CÓMO AGREGAR MÁS DE UNA FOTO 360° A UN MODAL
+    //  El tercer argumento de initCampusModal(...) es una LISTA de imágenes.
+    //  Poné una URL por foto, separadas por coma. Con 2 o más, aparecen
+    //  automáticamente las flechas ‹ › y el contador "1 / N" (también se puede
+    //  navegar con las flechas del teclado). Ejemplo:
+    //
+    //    ], [
+    //        {{ '{{' }} url_for('images', filename='biblioteca-1.jpg')|tojson {{ '}}' }},
+    //        {{ '{{' }} url_for('images', filename='biblioteca-2.jpg')|tojson {{ '}}' }},
+    //        {{ '{{' }} url_for('images', filename='biblioteca-3.jpg')|tojson {{ '}}' }}
+    //    ]);
+    //
+    //  Los archivos deben ser fotos panorámicas equirectangulares (2:1) y estar
+    //  en la carpeta app/images/ (se sirven desde /images/<archivo>).
+    // ─────────────────────────────────────────────────────────────────────────
+    initCampusModal('biblioteca', [
+        "La biblioteca más antigua del mundo que sigue en funcionamiento es la de Al-Qarawiyyin, en Fez (Marruecos), fundada en el año 859.",
+        "En la antigua Biblioteca de Alejandría se llegaron a guardar hasta 700.000 rollos de papiro.",
+        "La palabra biblioteca viene del griego biblíon, que significa libro, y thḗkē, que significa depósito: literalmente, depósito de libros.",
+        "La Biblioteca del Congreso de EE. UU. tiene más de 170 millones de artículos en su colección.",
+        "En la Edad Media, muchos libros se encadenaban a los estantes de la biblioteca para evitar que se los robaran.",
+        "El sistema decimal Dewey, usado para clasificar libros por tema, fue inventado en 1876 por un bibliotecario de apenas 21 años.",
+        "Finlandia es, en proporción, el país con más préstamos de biblioteca por persona al año en el mundo.",
+        "La Biblioteca Nacional de Colombia, fundada en 1777, es una de las más antiguas de todo el continente americano.",
+        "La invención de la imprenta por Gutenberg en 1440 transformó las bibliotecas: antes, copiar un solo libro a mano podía tardar meses.",
+        "En japonés, la palabra para \"biblioteca\" es toshokan (図書館), que literalmente significa \"edificio de libros e ilustraciones\"."
+    ], [
+    {{ url_for('images', filename='colegio/biblioteca segundo piso.png')|tojson }}
+        // Agregá aquí más fotos 360° de la biblioteca (una por línea, con coma delante):
+        // , {{ url_for('images', filename='biblioteca-2.jpg')|tojson }}
+        // , {{ url_for('images', filename='biblioteca-3.jpg')|tojson }}
+    ]);
+
+    initCampusModal('bloqueD', [
+        "La palabra \"aula\" viene del latín aula, que en la Antigua Roma nombraba el patio o la sala principal de una vivienda.",
+        "Las escuelas con aulas separadas por edades son un invento relativamente reciente: se popularizaron apenas en el siglo XIX.",
+        "El color verde de muchos tableros escolares se eligió porque cansa menos la vista que el negro tras varias horas de clase.",
+        "Identificar los edificios escolares con letras (A, B, C, D…) es una práctica común para ayudar a los estudiantes nuevos a ubicarse rápido.",
+        "La mochila moderna de dos correas se inventó en 1938, pero no se hizo popular entre los estudiantes hasta los años 60.",
+        "El recreo no es solo un descanso: estudios muestran que las pausas activas mejoran la concentración en clase.",
+        "El colegio más grande del mundo por número de estudiantes, en Lucknow (India), tiene más de 55.000 alumnos matriculados.",
+        "Los pasillos anchos en los colegios no son casualidad: su diseño busca evitar aglomeraciones durante el cambio de clase.",
+        "El primer tablero de tiza para uso escolar se atribuye a James Pillans, un maestro escocés de comienzos del siglo XIX.",
+        "Identificar los edificios de un campus con letras es una convención tomada de la arquitectura hospitalaria, adaptada luego a los colegios."
+    ], [
+        {{ url_for('images', filename='colegio/bloque D.png')|tojson }}
+    ]);
+
+    initCampusModal('bloqueC', [
+        "La palabra \"curso\" viene del latín cursus, que significa \"carrera\" o \"recorrido\": el camino de aprendizaje de un año escolar.",
+        "En Colombia, el sistema de grados escolares (de 1° a 11°) se estandarizó formalmente durante el siglo XX.",
+        "Agrupar a los estudiantes por edad en \"cursos\" o \"grados\" se popularizó apenas en el siglo XIX, con la llegada de la educación pública masiva.",
+        "La palabra \"salón\" viene del francés salle, que originalmente significaba simplemente \"sala\".",
+        "Algunas escuelas en Japón mantienen a los mismos compañeros de curso durante toda la primaria, para fortalecer el sentido de comunidad.",
+        "El horario escolar dividido por asignaturas, como el que usamos hoy, se originó en Prusia a comienzos del siglo XIX.",
+        "Según la UNESCO, el número ideal de estudiantes por curso para un aprendizaje efectivo ronda los 25 alumnos.",
+        "La palabra \"grupo\" llegó al español desde el italiano gruppo, término que originalmente se usaba en el arte para nombrar un conjunto de figuras.",
+        "En la antigua Grecia, los estudiantes no usaban pupitres individuales: aprendían sentados en semicírculo alrededor de su maestro.",
+        "El uniforme escolar, tal como lo conocemos hoy, se originó en Inglaterra en el siglo XVI, en el Christ's Hospital de Londres."
+    ], [
+         {{ url_for('images', filename='colegio/bloque C-parteinicial.png')|tojson }},
+         {{ url_for('images', filename='colegio/bloque C-parteuno.png')|tojson }},
+         {{ url_for('images', filename='colegio/bloque C-partedos.png')|tojson }},
+        {{ url_for('images', filename='colegio/bloque C-partetres.png')|tojson }}
+
+    ]);
+
+    initCampusModal('rectoria', [
+        "La palabra \"rector\" viene del latín rectus, que significa \"el que dirige o gobierna\".",
+        "El cargo de rector nació en las universidades medievales; con el tiempo, muchos colegios adoptaron el título para su máxima autoridad.",
+        "Las primeras secretarías escolares surgieron en el siglo XIX, junto con los primeros sistemas formales de matrícula y registro académico.",
+        "En muchas instituciones, es el rector quien firma los diplomas de grado, por eso su firma aparece en los certificados oficiales.",
+        "La oficina de secretaría suele ser el primer punto de contacto de un colegio: allí se gestionan matrículas, certificados y trámites.",
+        "La palabra \"secretario\" viene del latín secretarius, relacionado con quien maneja información reservada o \"secreta\".",
+        "Algunas rectorías conservan libros de actas escritos a mano desde la fundación del colegio, como memoria histórica de la institución.",
+        "En las primeras universidades medievales, los rectores eran elegidos por los propios estudiantes, no designados por autoridades externas.",
+        "En muchas instituciones, el sello oficial que aparece en actas y diplomas se usaba, desde tiempos antiguos, para certificar la autenticidad de un documento incluso antes de que existieran las firmas.",
+        "En Colombia, la figura del rector escolar responde legalmente ante la Secretaría de Educación por la gestión académica y administrativa del colegio."
+    ], [
+        {{ url_for('images', filename='image.png')|tojson }}
+    ]);
+
+    initCampusModal('canchaFutbol', [
+        "El fútbol moderno nació en Inglaterra en 1863, cuando se fundó la Football Association y se escribieron sus primeras reglas oficiales.",
+        "Un campo de fútbol reglamentario puede medir entre 90 y 120 metros de largo, según la FIFA.",
+        "El balón clásico de 32 paneles blancos y negros se popularizó en el Mundial de México 1970.",
+        "La palabra \"gol\" viene del inglés goal, que significa \"meta\" u \"objetivo\".",
+        "El primer partido de fútbol femenino documentado se jugó en Escocia en 1881.",
+        "Jugar deportes en equipo como el fútbol ayuda a desarrollar habilidades sociales y de trabajo en equipo desde la infancia.",
+        "A la cancha de fútbol también se le llama \"el rectángulo verde\", por su clásica forma y color.",
+        "El silbato del árbitro se empezó a usar en el fútbol inglés en 1878; antes, los árbitros solo levantaban un pañuelo.",
+        "El campo deportivo del colegio tiene un área total de 522 metros cuadrados, de los cuales 498 metros cuadrados corresponden a la superficie de juego.",
+        "La construcción de este escenario deportivo, exclusivo para los estudiantes, requirió un presupuesto directo de 105 millones de pesos.",
+        "El pasto sintético en canchas escolares se popularizó porque resiste mejor el uso constante que el pasto natural en espacios de alto tráfico."
+    ], [
+        {{ url_for('images', filename='colegio/cancha de futbol.png')|tojson }}
+    ]);
+
+    initCampusModal('baloncesto', [
+    "El baloncesto fue inventado en 1891 por James Naismith.",
+    "El primer partido se jugó utilizando una canasta de duraznos como objetivo.",
+    "El baloncesto originalmente se creó como una actividad para practicar bajo techo durante el invierno.",
+    "Una cancha de baloncesto tiene líneas que delimitan zonas específicas para diferentes jugadas.",
+    "El pase, el drible y el lanzamiento son algunas de las habilidades fundamentales del baloncesto.",
+    "El baloncesto es uno de los deportes escolares más practicados en todo el mundo."
+], [
+    {{ url_for('images', filename='colegio/cancha de baloncesto.png')|tojson }}
+]);
+
+  initCampusModal('polifuncional', [
+    "El polifuncional es el espacio cerrado más grande del colegio.",
+    "Está diseñado para realizar diferentes tipos de actividades y eventos institucionales.",
+    "Su nombre refleja que puede utilizarse para muchas funciones diferentes.",
+    "Puede adaptarse para conferencias, reuniones, actividades culturales y eventos escolares.",
+    "Es un espacio pensado para reunir a una gran cantidad de estudiantes y miembros de la comunidad educativa."
+], [
+    {{ url_for('images', filename='colegio/polifuncional.png')|tojson }}
+]);
+
+initCampusModal('primaria', [
+    "La educación primaria suele abarcar los primeros 5 o 6 años de escolaridad.",
+    "La palabra \"primaria\" viene del latín primarius, que significa \"lo primero\".",
+    "Finlandia, reconocida por su sistema educativo, no empieza la educación formal hasta los 7 años.",
+    "Aprender a leer entre los 5 y 7 años es una de las etapas más determinantes.",
+    "El primer libro de texto ilustrado para niños fue muy importante en la educación.",
+    "En muchos países, la educación primaria es gratuita y obligatoria.",
+    "Los recreos y el juego libre en primaria son clave para el desarrollo.",
+    "La UNESCO considera la educación primaria universal una de sus metas.",
+    "Gran parte de los alumnos de primaria conviven en la sede principal.",
+    "El bloque de primaria destaca por recibir de forma activa a niños."
+], [
+    {{ url_for('images', filename='colegio/primaria derecha.png')|tojson }},
+    {{ url_for('images', filename='colegio/primaria-segunda-parte.png')|tojson }}
+]);
+
+
+    initCampusModal('coordinacionPrimaria', [
+        "La palabra \"auditorio\" viene del latín audire, que significa \"escuchar\".",
+        "Los auditorios escolares modernos se popularizaron a comienzos del siglo XX, como espacios para actos cívicos y culturales.",
+        "Un buen diseño acústico en un auditorio puede mejorar enormemente la comprensión de lo que se escucha, incluso sin micrófono.",
+        "La función de \"coordinación académica\" surgió para acompañar de cerca el proceso de aprendizaje de los estudiantes más pequeños.",
+        "Muchos colegios usan su auditorio tanto para actos formales como para actividades artísticas: teatro, danza y música.",
+        "El primer anfiteatro griego, precursor de los auditorios modernos, data del siglo V a. C.",
+        "La palabra \"coordinar\" viene del latín cum (junto) y ordinare (ordenar): literalmente, \"poner en orden junto a otros\".",
+        "En algunos colegios, el auditorio también funciona como polideportivo cubierto para los días de lluvia.",
+        "Los coordinadores de primaria gestionan la disciplina y las notas a través de un moderno sistema en línea, cglv.controlacademico.com, que conecta los reportes en tiempo real directamente con los padres de familia.",
+        "Antes de llegar a ser la rectora oficial, la magíster Isabel Rivero ejerció durante años como coordinadora académica de la institución.",
+        "Cada mes de febrero, los coordinadores de primaria organizan la elección digital del Personerito, la voz de los más pequeños ante el gobierno escolar.",
+        "El polifuncional es el espacio cerrado más grande del colegio, diseñado para albergar entre 600 y 750 personas sentadas durante los grandes eventos institucionales.",
+        "Su nombre, \"polifuncional\", refleja justamente eso: sirve para muchas funciones. Puede transformarse en cuestión de minutos, por ejemplo, en el salón de conferencias del proyecto \"Creo Mi Futuro\".",
+        "La figura del personero estudiantil existe en Colombia desde la Ley General de Educación de 1994, como representante de los derechos de los estudiantes."
+    ], [
+        {{ url_for('images', filename='colegio/coordinacion primaria.png')|tojson }}
+    ]);
+
+    initCampusModal('parqueInfantil', [
+        "El primer parque infantil público del mundo se inauguró en Manchester, Inglaterra, en 1859.",
+        "Jugar en parques infantiles ayuda a los niños a desarrollar el equilibrio, la coordinación y la confianza en sí mismos.",
+        "El tobogán, uno de los juegos más populares, se patentó por primera vez en Estados Unidos en 1922.",
+        "Los columpios modernos se inspiraron en los columpios rituales usados en fiestas de la antigua Grecia.",
+        "Los parques infantiles con superficies de caucho reciclado reducen significativamente el riesgo de lesiones por caídas.",
+        "El rojo y el azul, muy usados en los juegos infantiles, son de los colores que los niños distinguen más fácilmente a temprana edad.",
+        "Jugar libremente al aire libre está asociado con menores niveles de estrés y mejor concentración en clase.",
+        "Muchos parques infantiles escolares incluyen zonas de arena porque estimulan el juego sensorial y la creatividad.",
+        "Los primeros parques en escuelas usaban madera pesada y metal; hoy se construyen con plástico reciclado de alta densidad para evitar astillas y quemaduras por el sol.",
+        "Jugar solo 20 minutos en el parque escolar puede aumentar la concentración en clase y reducir drásticamente la ansiedad infantil.",
+        "La ley colombiana exige zonas de amortiguación, como arena o caucho, bajo los juegos infantiles para reducir el riesgo de golpes en caso de caída."
+    ], [
+        {{ url_for('images', filename='colegio/parque.png')|tojson }}
+    ]);
+
+initCampusModal('entrada', [
+    "La entrada principal es uno de los puntos de acceso más importantes de la institución.",
+    "El acceso principal permite orientar a estudiantes, docentes y visitantes.",
+    "La entrada funciona como uno de los principales puntos de referencia del colegio.",
+    "El escudo representa parte de la identidad de nuestra institución.",
+    "La entrada es el primer espacio que muchos visitantes conocen al llegar al colegio."
+], [
+    {{ url_for('images', filename='entrada360.png')|tojson }}
+]);
+
+initCampusModal('bloqueB', [
+    "La palabra \"profesor\" viene del latín professor, que significa \"el que declara públicamente\" su saber.",
+    "El 5 de octubre se celebra el Día Mundial de los Docentes, establecido por la UNESCO en 1994.",
+    "En Finlandia, ser profesor es una de las profesiones más respetadas y competitivas.",
+    "La tiza es uno de los símbolos clásicos del aula.",
+    "Un buen profesor puede influir en la trayectoria de vida de un estudiante.",
+    "La palabra \"maestro\" viene del latín magister.",
+    "Los primeros gremios de maestros organizados en Europa datan de la Edad Media.",
+    "Enseñar también significa aprender.",
+    "En Colombia, ejercer la docencia requiere formación correspondiente.",
+    "La calidad del profesorado influye en el rendimiento escolar."
+], [
+    {{ url_for('images', filename='colegio/bloque b.png')|tojson }},
+    {{ url_for('images', filename='colegio/bloque B-partedos.png')|tojson }},
+    {{ url_for('images', filename='colegio/bloque B-partetres.png')|tojson }}
+]);
+
+    initCampusModal('bloqueA', [
+    "El Bloque A es uno de los espacios académicos de la institución.",
+    "Sus aulas están destinadas al desarrollo de diferentes actividades de aprendizaje.",
+    "Los salones permiten realizar actividades individuales y trabajos en grupo.",
+    "El aprendizaje en el aula combina la explicación de los profesores con la participación de los estudiantes.",
+    "Los espacios académicos también pueden utilizarse para exposiciones, proyectos y actividades escolares.",
+    "El trabajo en equipo dentro del aula ayuda a fortalecer la comunicación y la colaboración entre los estudiantes.",
+    "Las aulas son espacios fundamentales para el desarrollo de las actividades académicas durante la jornada escolar.",
+    "La organización de los espacios permite que diferentes grupos puedan desarrollar sus actividades de manera adecuada.",
+    "El Bloque A forma parte de la infraestructura que permite desarrollar las actividades educativas de la institución.",
+    "Cada aula cumple una función importante dentro de la experiencia educativa de los estudiantes."
+], [
+     {{ url_for('images', filename='colegio/bloque A-parteuno.png')|tojson }},
+    {{ url_for('images', filename='colegio/bloque A-partedos.png')|tojson }},
+    {{ url_for('images', filename='colegio/bloque A-partetres.png')|tojson }},
+    {{ url_for('images', filename='colegio/bloque A-partecuatro.png')|tojson }}
+]);
+
+   initCampusModal('laboratorio', [
+    "El laboratorio de Física y Química es un espacio destinado al aprendizaje práctico de las ciencias.",
+    "Los experimentos permiten observar de manera directa diferentes fenómenos físicos y químicos.",
+    "La Física estudia fenómenos relacionados con la materia, la energía, el movimiento y las fuerzas.",
+    "La Química estudia la composición, propiedades y transformaciones de la materia.",
+    "El trabajo experimental permite relacionar los conceptos aprendidos en clase con situaciones prácticas.",
+    "Los instrumentos de laboratorio ayudan a realizar mediciones y observaciones de manera controlada.",
+    "Los laboratorios escolares permiten desarrollar habilidades como la observación, el análisis y la formulación de hipótesis.",
+    "Las prácticas experimentales también ayudan a desarrollar el trabajo en equipo.",
+    "La seguridad es una parte fundamental de cualquier actividad realizada dentro de un laboratorio.",
+    "El laboratorio es un espacio donde la curiosidad y la experimentación ayudan a comprender mejor las ciencias."
+], [
+    {{ url_for('images', filename='colegio/laboratorios.png')|tojson }}
+]);
+
+initCampusModal('aulasEspecializadas', [
+    "La primera computadora personal pensada para uso educativo, la Apple II, llegó a las aulas escolares en 1977.",
+    "Pintar y hacer manualidades en la infancia estimula la creatividad y también el desarrollo motor fino.",
+    "La palabra \"aula\" viene del latín aula, que significaba \"sala\" o \"patio principal\" en la antigua Roma.",
+    "Leonardo da Vinci llevaba siempre consigo un cuaderno de bocetos, una costumbre que hoy se sigue fomentando en las clases de arte.",
+    "La primera aula de informática escolar en muchos países se implementó recién en la década de 1980.",
+    "Los colores primarios (rojo, azul y amarillo) son la base con la que se enseña teoría del color en la mayoría de las clases de pintura.",
+    "Programar desde temprana edad ayuda a desarrollar el pensamiento lógico y la resolución de problemas.",
+    "El primer \"mouse\" de computador, inventado en 1964, era de madera y tenía solo un botón.",
+    "Las aulas de arte y música surgieron como espacios separados apenas a comienzos del siglo XX.",
+    "Tocar un instrumento musical desde la niñez se ha asociado con un mejor desarrollo de la memoria y la coordinación motora."
+], [
+    {{ url_for('images', filename='colegio/salas especializadas.png')|tojson }},
+   {{ url_for('images', filename='colegio/salas_especializadas_360.png')|tojson }}
+
+]);
+
+    // El asistente puede pedir abrir un visor 360° desde otra página; llega
+    // aquí con "/#accion=<boton>". Al cargar, abrimos ese modal.
+    (function () {
+        var m = /(?:^|#|&)accion=([^&]+)/.exec(window.location.hash || '');
+        if (!m) return;
+        var accion = decodeURIComponent(m[1]);
+        var modalEl = document.getElementById(accion + 'Modal');
+        if (modalEl && window.bootstrap && window.bootstrap.Modal) {
+            window.bootstrap.Modal.getOrCreateInstance(modalEl).show();
+        }
+        history.replaceState(null, '', window.location.pathname + window.location.search);
+    })();
+
+</script>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Editar profesor · Portal Escolar{% endblock %}
+
+{% block content %}
+<section class="app-card anim-fade-up" style="max-width: 620px; width: 100%; margin: 0 auto;">
+    <div class="page-header">
+        <div>
+            <span class="page-header__eyebrow">Editar</span>
+            <h1>Editar profesor</h1>
+        </div>
+        <div class="breadcrumbs">
+            <a href="{{ url_for('profesores.profesores_page') }}">← Profesores</a>
+        </div>
+    </div>
+
+    {% if error %}
+    <div class="alert alert-danger" role="alert">{{ error }}</div>
+    {% endif %}
+
+    <form method="post" class="d-flex flex-column gap-3">
+        <div>
+            <label for="nombre" class="form-label">Nombre</label>
+            <input id="nombre" name="nombre" type="text" class="form-control" value="{{ profesor.nombre }}" required>
+        </div>
+        <div>
+            <label for="curso_id" class="form-label">Curso</label>
+            <select id="curso_id" name="curso_id" class="form-select">
+                <option value="">Sin curso</option>
+                {% for curso in cursos %}
+                <option value="{{ curso.id }}" {% if profesor.curso_id == curso.id %}selected{% endif %}>{{ curso.nombre }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label for="horario_atencion" class="form-label">Horario de atención</label>
+            <input id="horario_atencion" name="horario_atencion" type="text" class="form-control"
+                   value="{{ profesor.horario_atencion or '' }}" placeholder="Ej. Lunes y jueves 10:00-12:00">
+        </div>
+        <div>
+            <label for="ubicacion_id" class="form-label">Salón de atención</label>
+            <select id="ubicacion_id" name="ubicacion_id" class="form-select">
+                <option value="">Sin salón</option>
+                {% for ubicacion in ubicaciones %}
+                <option value="{{ ubicacion.id }}" {% if profesor.ubicacion_id == ubicacion.id %}selected{% endif %}>{{ ubicacion.nombre }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="d-flex gap-2 mt-2">
+            <button type="submit" class="btn btn-primary">💾 Guardar</button>
+            <a href="{{ url_for('profesores.profesores_page') }}" class="btn btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</section>
+{% endblock %}

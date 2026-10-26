@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Ejemplo Modo AR · {{ datos.ubicacion.nombre if datos.ubicacion else slug }}{% endblock %}
+
+{% block content %}
+<section class="app-card anim-fade-up" style="max-width: 760px; width: 100%; margin: 0 auto;">
+    <div class="page-header">
+        <div>
+            <span class="page-header__eyebrow">Modo AR · Ejemplo</span>
+            <h1>🧪 Ejemplo: {{ datos.ubicacion.nombre if datos.ubicacion else slug }}</h1>
+            <p>
+                Una experiencia AR de prueba, fija en el código (no requiere crear nada en el
+                CRUD), pensada para explicar de punta a punta cómo funciona el Modo AR:
+            </p>
+        </div>
+        <div class="breadcrumbs">
+            <a href="{{ url_for('ar.experiencias_page') }}">← Experiencias AR</a>
+        </div>
+    </div>
+
+    <ol class="text-muted" style="padding-left: 1.2rem; display:flex; flex-direction:column; gap:.4rem;">
+        <li>
+            Esta página extra exporta un JSON de prueba en
+            <a href="{{ url_for('api.ar_demo_json', slug=slug) }}" target="_blank">/api/ar/demo/{{ slug }}</a>
+            con el personaje, el diálogo y el aviso de que hay que leerlo en voz alta
+            (<code>modo_audio</code>).
+        </li>
+        <li>Esa URL se referencia desde el código QR de abajo. Al escanearlo (o abrirlo) desde el Modo AR, la app lo descarga y hace aparecer a León ya personalizado con esos datos (sin ese QR, León no aparece).</li>
+        <li>Como no tiene un archivo de audio grabado (<code>sonido_url</code>), el visor usa la síntesis de voz del navegador para <strong>leer el diálogo en voz alta</strong> apenas aparece la figura.</li>
+    </ol>
+
+    <div class="d-flex flex-wrap align-items-center gap-4 my-3">
+        <div class="text-center">
+            <img src="{{ url_for('ar.demo_qr', slug=slug) }}" alt="QR del ejemplo {{ slug }}" width="180" height="180"
+                 style="border-radius:10px; border:1px solid var(--c-border); background:#fff; padding:8px;">
+            <div class="mt-2">
+                <a href="{{ url_for('ar.demo_qr', slug=slug) }}" download="qr-demo-{{ slug }}.png" class="btn btn-sm btn-outline-primary">⬇️ Descargar QR</a>
+            </div>
+        </div>
+        <div class="d-flex flex-column gap-2">
+            <a href="{{ url_for('ar.ar_page') }}#demo:{{ slug }}" class="btn btn-primary d-none" hidden>📷 Abrir en Modo AR</a>
+            <button type="button" class="btn btn-outline-primary" id="demoEscucharBtn">🎧 Escuchar el diálogo aquí</button>
+            <a href="{{ url_for('api.ar_demo_json', slug=slug) }}" target="_blank" class="btn btn-outline-secondary btn-sm">{ } Ver JSON crudo</a>
+        </div>
+    </div>
+
+    <div class="form-panel">
+        <div class="form-panel__title">📄 JSON exportado</div>
+        <pre style="white-space: pre-wrap; word-break: break-word; margin:0;">{{ datos | tojson(indent=2) }}</pre>
+    </div>
+
+    <p class="ar-hint">
+        Al pulsar "Abrir en Modo AR" no hace falta apuntar la cámara a ningún QR físico: la
+        URL ya trae el marcador del ejemplo en el fragmento (<code>#demo:{{ slug }}</code>), así
+        que apenas actives la cámara, León aparece y lee el diálogo solo. El QR de arriba sirve
+        para probar el flujo completo escaneándolo con otro dispositivo.
+    </p>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    (() => {
+        const btn = document.getElementById("demoEscucharBtn");
+        const texto = {{ (datos.dialogo or "") | tojson }};
+        if (!btn) return;
+        if (!("speechSynthesis" in window) || !texto) {
+            btn.disabled = true;
+            btn.title = "Este navegador no soporta síntesis de voz.";
+            return;
+        }
+        btn.addEventListener("click", () => {
+            window.speechSynthesis.cancel();
+            const utter = new SpeechSynthesisUtterance(texto);
+            utter.lang = "es-ES";
+            window.speechSynthesis.speak(utter);
+        });
+    })();
+</script>
+{% endblock %}

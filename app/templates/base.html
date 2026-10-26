@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>{% block title %}Portal Escolar{% endblock %}</title>
+
+    <!-- PWA: manifest, iconos e íconos de instalación (Android/iOS/escritorio) -->
+    <link rel="manifest" href="{{ url_for('manifest') }}">
+    <meta name="theme-color" content="#6E0F1F">
+    <link rel="icon" href="{{ url_for('static', filename='icons/favicon-32.png') }}" sizes="32x32">
+    <link rel="icon" href="{{ url_for('static', filename='icons/icon-192.png') }}" sizes="192x192">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/apple-touch-icon.png') }}">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Portal Escolar">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+          crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+<video class="app-bg-video" autoplay muted loop playsinline preload="auto" aria-hidden="true"
+       src="{{ url_for('images', filename='video.mp4') }}"></video>
+<div class="app-bg-overlay" aria-hidden="true"></div>
+
+<audio id="bgSound" src="{{ url_for('audio', filename='sound.mp3') }}" loop preload="auto"></audio>
+
+<div id="pageLoader" class="page-loader">
+    <span class="page-loader__badge">🎓</span>
+</div>
+
+<div class="app-shell">
+
+    <header class="app-header">
+        <button class="header-burger" id="sidebarToggle" aria-label="Abrir menú" type="button">☰</button>
+
+        <a class="brand" href="{{ url_for('index.index') }}">
+            <span class="brand-badge">🎓</span>
+            <span class="brand-text">
+                <strong>Portal Escolar</strong>
+                <small>Explora tu colegio</small>
+            </span>
+        </a>
+
+        <div class="header-actions">
+            <a class="header-cta" href="{{ url_for('juego.juego_page') }}" title="Pasar a modo aventura">
+                <span class="header-cta__icon">🦁</span>
+                <span class="header-cta__text">Modo aventura</span>
+            </a>
+
+            <button type="button" class="header-tour-btn" id="tourStartBtn" title="Ver guía paso a paso" aria-label="Ver guía paso a paso">
+                <span class="header-tour-btn__icon">🧭</span>
+            </button>
+
+            <div class="dropdown">
+                <button type="button" class="header-sound-btn" id="soundToggleBtn" data-bs-toggle="dropdown" aria-expanded="false" title="Preferencias de sonido" aria-label="Preferencias de sonido">🔊</button>
+                <ul class="dropdown-menu dropdown-menu-end sound-menu" aria-labelledby="soundToggleBtn">
+                    <li>
+                        <button type="button" class="dropdown-item sound-option" data-sound-mode="todo" role="menuitemradio">
+                            <span class="sound-option__icon">🔊</span>
+                            <span class="sound-option__body">
+                                <strong>Todo el sonido</strong>
+                                <small>Música de fondo y efectos</small>
+                            </span>
+                            <span class="sound-option__check" aria-hidden="true">✓</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" class="dropdown-item sound-option" data-sound-mode="sin-fondo" role="menuitemradio">
+                            <span class="sound-option__icon">🎧</span>
+                            <span class="sound-option__body">
+                                <strong>Solo efectos</strong>
+                                <small>Sin música de fondo</small>
+                            </span>
+                            <span class="sound-option__check" aria-hidden="true">✓</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" class="dropdown-item sound-option" data-sound-mode="silencio" role="menuitemradio">
+                            <span class="sound-option__icon">🔇</span>
+                            <span class="sound-option__body">
+                                <strong>Sin sonido</strong>
+                                <small>Silenciar todo</small>
+                            </span>
+                            <span class="sound-option__check" aria-hidden="true">✓</span>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </header>
+
+    <div class="app-body">
+
+        <aside class="app-sidebar" id="appSidebar">
+            <nav class="side-nav">
+                {% set nav_items = [
+                    ("index.index", "index", "🏠", "Inicio"),
+                    ("juego.juego_page", "juego", "🦁", "Aventura"),
+                    ("profesores.profesores_page", "profesores", "👩‍🏫", "Profesores"),
+                    ("cursos.cursos_page", "cursos", "📚", "Cursos"),
+                    ("materias.materias_page", "materias", "📖", "Materias"),
+                    ("ubicaciones.ubicaciones_page", "ubicaciones", "📍", "Ubicaciones"),
+                    ("rutas.rutas_page", "rutas", "🧭", "Cómo llegar"),
+                    ("cronogramas.cronogramas_page", "cronogramas", "📅", "Cronograma"),
+                    ("informaciones_institucionales.informaciones_institucionales", "informaciones_institucionales", "🏛️", "Información institucional"),
+                ] %}
+                {% for endpoint, blueprint, icon, label in nav_items %}
+                <a class="side-nav__item{% if request.blueprint == blueprint %} is-active{% endif %}"
+                   data-label="{{ label }}"
+                   href="{{ url_for(endpoint) }}">
+                    <span class="side-nav__icon">{{ icon }}</span>
+                    <span>{{ label }}</span>
+                </a>
+                {% endfor %}
+            </nav>
+
+            <div class="sidebar-card">
+                <span class="sidebar-card__icon">🦁</span>
+                Tu colegio, a un clic
+                <p>Explora, pregunta y navega todo el campus.</p>
+            </div>
+        </aside>
+
+        <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+        <main class="app-main">
+            {% block content %}{% endblock %}
+        </main>
+
+        <aside class="assistant-panel" id="assistantPanel">
+            <div class="assistant-header">
+                <span class="assistant-avatar" id="assistantAvatar" data-mascot-mount></span>
+                <div>
+                    <strong>Asistente Virtual</strong>
+                    <small>En línea</small>
+                </div>
+                <button class="assistant-close" id="assistantClose" type="button" aria-label="Cerrar asistente">←</button>
+            </div>
+
+            <div class="assistant-tabs" role="tablist" aria-label="Vista del asistente">
+                <button type="button" class="assistant-tab is-active" id="assistantTabChat" role="tab" aria-selected="true">💬 Chat</button>
+                <button type="button" class="assistant-tab" id="assistantTabMap" role="tab" aria-selected="false">🗺️ Mapa</button>
+            </div>
+
+            <div class="assistant-views" id="assistantViews">
+
+            <div class="assistant-view assistant-view--chat" id="assistantChatView">
+            <div class="assistant-body-frame" id="assistantBodyFrame">
+            <div class="assistant-body" id="assistantBody">
+                <div class="chat-msg chat-msg--bot">
+                    <span class="chat-msg__avatar">
+                        <span class="mascot" data-state="idle">
+                            <span class="mascot__halo" aria-hidden="true"></span>
+                            <span class="mascot__ring" aria-hidden="true"></span>
+                            <span class="mascot__emoji" role="img" aria-label="Asistente virtual">🦁</span>
+                        </span>
+                    </span>
+                    <div class="chat-bubble">
+                        <span class="chat-bubble__text" id="assistantGreetingText"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="assistant-preloader" id="assistantPreloader" aria-hidden="true">
+                <video class="assistant-preloader__video" id="assistantPreloaderVideo" src="/images/leon_beige.mp4" muted playsinline loop preload="auto"></video>
+            </div>
+            </div>
+
+            <form class="assistant-input" id="assistantForm">
+                <button type="button" class="assistant-camera d-none" id="assistantCameraBtn" aria-label="Abrir cámara · Modo AR" hidden>📷</button>
+                <span class="assistant-emoji" aria-hidden="true">😊</span>
+                <input type="text" id="assistantInput" placeholder="Escribe un mensaje" autocomplete="off">
+                <button type="submit" class="assistant-send" id="assistantSendBtn" aria-label="Enviar mensaje">
+                    <span class="assistant-send__icon" id="assistantSendIcon">🎤</span>
+                </button>
+            </form>
+            </div>
+
+            <div class="assistant-view assistant-view--map" id="assistantMapView" hidden>
+                <div class="assistant-map-empty" id="assistantMapEmpty">
+                    <span class="assistant-map-empty__icon" aria-hidden="true">🗺️</span>
+                    <p>El mapa del campus está disponible en la página de Inicio.</p>
+                    <a class="btn btn-primary btn-sm" href="{{ url_for('index.index') }}">Ir al mapa</a>
+                </div>
+            </div>
+
+            <div class="assistant-view assistant-view--camera" id="assistantCameraView" hidden>
+                <div class="assistant-camera-header">
+                    <button type="button" class="assistant-camera-close" id="assistantCameraClose" aria-label="Volver al chat">←</button>
+                    <strong>📷 Modo AR</strong>
+                </div>
+                <div class="assistant-camera-frame">
+                    <iframe id="assistantCameraFrame" title="Modo AR"
+                            allow="camera; xr-spatial-tracking; gyroscope; accelerometer"></iframe>
+                </div>
+            </div>
+
+            </div>
+        </aside>
+
+        <button class="assistant-fab" id="assistantFab" type="button" aria-label="Abrir asistente virtual">💬</button>
+
+    </div>
+
+</div>
+
+<div class="tour-overlay" id="tourOverlay" role="dialog" aria-modal="true" aria-label="Guía paso a paso">
+    <div class="tour-spotlight" id="tourSpotlight"></div>
+    <div class="tour-tooltip" id="tourTooltip">
+        <span class="tour-tooltip__step" id="tourStepLabel"></span>
+        <h3 class="tour-tooltip__title" id="tourTitle"></h3>
+        <p class="tour-tooltip__text" id="tourText"></p>
+        <div class="tour-tooltip__dots" id="tourDots"></div>
+        <div class="tour-tooltip__actions">
+            <button type="button" class="tour-btn tour-btn--ghost" id="tourSkipBtn">Saltar</button>
+            <div class="tour-tooltip__nav">
+                <button type="button" class="tour-btn tour-btn--ghost" id="tourPrevBtn">Atrás</button>
+                <button type="button" class="tour-btn tour-btn--primary" id="tourNextBtn">Siguiente</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+        crossorigin="anonymous"></script>
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+<script>
+    // Registro del service worker (instalación como PWA + funcionamiento offline).
+    // Servido desde la raíz (/sw.js, ver app/web.py) para que su scope cubra toda la app.
+    if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+            navigator.serviceWorker.register("/sw.js").catch(() => {});
+        });
+    }
+</script>
+{% block extra_scripts %}{% endblock %}
+
+</body>
+</html>

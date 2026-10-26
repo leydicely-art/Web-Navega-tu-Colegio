@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Información Institucional · Portal Escolar{% endblock %}
+
+{% block content %}
+<section class="app-card anim-fade-up" style="max-width: 760px; width: 100%; margin: 0 auto;">
+    <div class="page-header">
+        <div>
+            <span class="page-header__eyebrow">Editar</span>
+            <h1>Editar Información Institucional</h1>
+        </div>
+        <div class="breadcrumbs">
+            <a href="{{ url_for('informaciones_institucionales.informaciones_institucionales') }}">← Información</a>
+        </div>
+    </div>
+
+    {% if error %}
+    <div class="alert alert-danger" role="alert">{{ error }}</div>
+    {% endif %}
+
+    <form method="post" class="d-flex flex-column gap-3">
+        <div>
+            <label class="form-label">Título</label>
+            <input type="text" class="form-control" name="titulo" value="{{ informacion.titulo }}" required>
+        </div>
+
+        <div>
+            <label class="form-label">Categoría</label>
+            <select class="form-select" name="categoria" required>
+                <option value="Institucional" {% if informacion.categoria == "Institucional" %}selected{% endif %}>Institucional</option>
+                <option value="Historia" {% if informacion.categoria == "Historia" %}selected{% endif %}>Historia</option>
+                <option value="Normas" {% if informacion.categoria == "Normas" %}selected{% endif %}>Normas</option>
+                <option value="Símbolos" {% if informacion.categoria == "Símbolos" %}selected{% endif %}>Símbolos</option>
+                <option value="Servicios" {% if informacion.categoria == "Servicios" %}selected{% endif %}>Servicios</option>
+                <option value="Otros" {% if informacion.categoria == "Otros" %}selected{% endif %}>Otros</option>
+            </select>
+        </div>
+
+        <div>
+            <label class="form-label">Palabras clave</label>
+            <input type="text" class="form-control" name="palabras_clave" value="{{ informacion.palabras_clave }}" required>
+        </div>
+
+        <div>
+            <label class="form-label">Contenido</label>
+            <textarea class="form-control" name="contenido" rows="8" required>{{ informacion.contenido }}</textarea>
+        </div>
+
+        <div class="col-md-4">
+            <label class="form-label">Estado</label>
+            <select class="form-select" name="estado">
+                <option value="Activo" {% if informacion.estado == "Activo" %}selected{% endif %}>Activo</option>
+                <option value="Inactivo" {% if informacion.estado == "Inactivo" %}selected{% endif %}>Inactivo</option>
+            </select>
+        </div>
+
+        <div class="d-flex gap-2 mt-2">
+            <button type="submit" class="btn btn-success">💾 Guardar cambios</button>
+            <a href="{{ url_for('informaciones_institucionales.informaciones_institucionales') }}" class="btn btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</section>
+{% endblock %}

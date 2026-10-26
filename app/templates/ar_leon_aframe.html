@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>León AR · A-Frame + MindAR</title>
+
+    <!-- A-Frame primero; MindAR se registra encima como componente de A-Frame. -->
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+
+    <style>
+        html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #10120f; }
+
+        /* Ayudas en pantalla (MindAR ya dibuja su propio marco de escaneo). */
+        .ar-hint {
+            position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%);
+            z-index: 10; max-width: 90vw;
+            padding: 10px 16px; border-radius: 999px;
+            background: rgba(16, 18, 15, .72); color: #fff;
+            font: 600 14px/1.35 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+            text-align: center; backdrop-filter: blur(6px);
+        }
+        .ar-back {
+            position: fixed; left: 14px; top: 14px; z-index: 10;
+            padding: 8px 14px; border-radius: 999px; text-decoration: none;
+            background: rgba(16, 18, 15, .72); color: #fff;
+            font: 700 13px/1 system-ui, sans-serif; backdrop-filter: blur(6px);
+        }
+        .ar-setup {
+            position: fixed; inset: 0; z-index: 20; display: none;
+            place-items: center; padding: 24px;
+            background: rgba(16, 18, 15, .92); color: #fff;
+            font: 400 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        }
+        .ar-setup.is-visible { display: grid; }
+        .ar-setup__card { max-width: 460px; }
+        .ar-setup h2 { margin: 0 0 .6rem; font-size: 1.15rem; }
+        .ar-setup code { background: rgba(255,255,255,.12); padding: 1px 6px; border-radius: 5px; }
+        .ar-setup a { color: #ffd479; }
+    </style>
+</head>
+<body>
+
+<a href="/ar" class="ar-back">← Volver</a>
+<div class="ar-hint" id="arHint">Apunta la cámara al marcador del colegio…</div>
+
+<div class="ar-setup" id="arSetup">
+    <div class="ar-setup__card">
+        <h2>Falta compilar el marcador</h2>
+        <p>
+            MindAR necesita un archivo <code>targets.mind</code> generado a partir de la imagen
+            del marcador (<code>app/images/image.png</code>).
+        </p>
+        <p>
+            1. Abre el compilador de MindAR:
+            <a href="https://hiukim.github.io/mind-ar-js-doc/tools/compile" target="_blank" rel="noopener">
+                hiukim.github.io/mind-ar-js-doc/tools/compile</a><br>
+            2. Sube <code>image.png</code>, pulsa <em>Start</em> y descarga <code>targets.mind</code>.<br>
+            3. Copia ese archivo a <code>app/images/targets.mind</code> y recarga esta página.
+        </p>
+        <p style="opacity:.75">
+            Mientras tanto, imprime o muestra <code>image.png</code> en otra pantalla para probar
+            el seguimiento una vez compilado.
+        </p>
+    </div>
+</div>
+
+<!--
+  Escena AR con seguimiento de imagen (MindAR). El León NO usa lion.glb: ese
+  modelo es un único mesh estático (~56 MB, sin esqueleto), así que no se le
+  puede animar la boca ni las manos. Aquí se arma con primitivas de A-Frame y
+  el componente `lion-rig` (más abajo) mueve la mandíbula y los brazos por
+  separado en cada frame.
+-->
+<a-scene
+    mindar-image="imageTargetSrc: /images/targets.mind; autoStart: true; uiLoading: yes; uiScanning: yes; uiError: no; filterMinCF: 0.0001; filterBeta: 0.01; missTolerance: 5; warmupTolerance: 5"
+    color-space="sRGB"
+    renderer="colorManagement: true, physicallyCorrectLights: true, antialias: true"
+    vr-mode-ui="enabled: false"
+    device-orientation-permission-ui="enabled: false"
+    embedded>
+
+    <a-camera position="0 0 0" look-controls="enabled: false" cursor="fuse: false; rayOrigin: mouse"></a-camera>
+
+    <a-entity light="type: ambient; color: #fff; intensity: 0.9"></a-entity>
+    <a-entity light="type: directional; color: #fff; intensity: 0.7" position="1 2 1"></a-entity>
+
+    <a-entity id="target" mindar-image-target="targetIndex: 0">
+
+        <!-- Wrapper girado -90° en X: el León se "levanta" del marcador como
+             un pop-up cuando la tarjeta está sobre una mesa. -->
+        <a-entity rotation="-90 0 0">
+            <a-entity id="lion" lion-rig class="clickable" scale="0.55 0.55 0.55">
+
+                <!-- ---- Cuerpo ---- -->
+                <a-entity class="lion-body" position="0 0.45 0">
+                    <a-sphere radius="0.28" scale="1 1.15 0.9" color="#d99a3c"></a-sphere>
+                    <a-sphere radius="0.18" position="0 -0.04 0.16" scale="1 1.1 0.6" color="#f6e0b8"></a-sphere>
+                </a-entity>
+
+                <!-- Patas traseras / delanteras (estáticas) -->
+                <a-cylinder radius="0.06" height="0.22" color="#d99a3c" position="-0.13 0.11 0.12"></a-cylinder>
+                <a-cylinder radius="0.06" height="0.22" color="#d99a3c" position="0.13 0.11 0.12"></a-cylinder>
+                <a-sphere radius="0.11" color="#d99a3c" position="-0.16 0.2 -0.16"></a-sphere>
+                <a-sphere radius="0.11" color="#d99a3c" position="0.16 0.2 -0.16"></a-sphere>
+
+                <!-- ---- Brazos animados (manos que saludan) ----
+                     El origen de cada entidad está en el "hombro"; el brazo
+                     cuelga hacia -Y, así que rotar en Z lo balancea como un
+                     péndulo (ver lion-rig). -->
+                <a-entity class="lion-arm lion-arm-left" position="-0.24 0.6 0.14">
+                    <a-cylinder radius="0.055" height="0.26" color="#d99a3c" position="0 -0.13 0"></a-cylinder>
+                    <a-sphere radius="0.08" color="#8a5a2b" position="0 -0.28 0"></a-sphere>
+                </a-entity>
+                <a-entity class="lion-arm lion-arm-right" position="0.24 0.6 0.14">
+                    <a-cylinder radius="0.055" height="0.26" color="#d99a3c" position="0 -0.13 0"></a-cylinder>
+                    <a-sphere radius="0.08" color="#8a5a2b" position="0 -0.28 0"></a-sphere>
+                </a-entity>
+
+                <!-- ---- Cabeza ---- -->
+                <a-entity class="lion-head" position="0 0.92 0.08">
+                    <!-- Melena: torus en el plano XY, enmarca la cara -->
+                    <a-torus radius="0.3" radius-tubular="0.1" segments-tubular="20" color="#8a5a2b" position="0 0 -0.04"></a-torus>
+                    <a-sphere radius="0.22" color="#d99a3c"></a-sphere>
+
+                    <!-- Hocico + nariz -->
+                    <a-sphere radius="0.12" position="0 -0.05 0.15" scale="1.1 0.8 0.9" color="#f6e0b8"></a-sphere>
+                    <a-sphere radius="0.035" position="0 0.0 0.27" color="#2b1a10"></a-sphere>
+
+                    <!-- Ojos -->
+                    <a-sphere radius="0.045" position="-0.09 0.06 0.18" color="#fff"></a-sphere>
+                    <a-sphere radius="0.045" position="0.09 0.06 0.18" color="#fff"></a-sphere>
+                    <a-sphere radius="0.022" position="-0.09 0.06 0.215" color="#2b1a10"></a-sphere>
+                    <a-sphere radius="0.022" position="0.09 0.06 0.215" color="#2b1a10"></a-sphere>
+
+                    <!-- Orejas (tic ocasional) -->
+                    <a-sphere class="lion-ear-left" radius="0.06" position="-0.18 0.16 -0.02" color="#8a5a2b"></a-sphere>
+                    <a-sphere class="lion-ear-right" radius="0.06" position="0.18 0.16 -0.02" color="#8a5a2b"></a-sphere>
+
+                    <!-- ---- Mandíbula animada (boca que habla) ----
+                         Bisagra en el origen de .lion-jaw; al rotar en -X la
+                         parte de adelante baja y "abre" la boca. -->
+                    <a-entity class="lion-jaw" position="0 -0.12 0.04">
+                        <a-sphere radius="0.1" position="0 -0.05 0.09" scale="1 0.5 0.95" color="#f6e0b8"></a-sphere>
+                        <a-box depth="0.14" width="0.16" height="0.04" position="0 -0.02 0.06" color="#5b2a2a"></a-box>
+                    </a-entity>
+                </a-entity>
+
+                <!-- ---- Cola ---- -->
+                <a-entity class="lion-tail" position="0 0.5 -0.24">
+                    <a-cylinder radius="0.028" height="0.34" rotation="55 0 0" position="0 -0.02 -0.14" color="#d99a3c"></a-cylinder>
+                    <a-sphere radius="0.06" position="0 -0.16 -0.28" color="#8a5a2b"></a-sphere>
+                </a-entity>
+
+            </a-entity>
+        </a-entity>
+    </a-entity>
+</a-scene>
+
+<script>
+/* ------------------------------------------------------------------
+   lion-rig: anima las partes del León en cada frame.
+   - boca (.lion-jaw): abre/cierra; rápido y marcado cuando `talking`.
+   - manos (.lion-arm-*): saludo al detectar el marcador y gesticulan
+     mientras habla; leve balanceo en reposo.
+   - extras: respiración del cuerpo, cabeceo, tic de orejas, cola.
+   ------------------------------------------------------------------ */
+AFRAME.registerComponent('lion-rig', {
+    schema: { talking: { default: false } },
+
+    init: function () {
+        this.jaw  = this.el.querySelector('.lion-jaw');
+        this.armL = this.el.querySelector('.lion-arm-left');
+        this.armR = this.el.querySelector('.lion-arm-right');
+        this.head = this.el.querySelector('.lion-head');
+        this.body = this.el.querySelector('.lion-body');
+        this.tail = this.el.querySelector('.lion-tail');
+        this.earL = this.el.querySelector('.lion-ear-left');
+        this.earR = this.el.querySelector('.lion-ear-right');
+
+        this.greetUntil = 0;
+        this.el.addEventListener('lion-greet', () => {
+            this.greetUntil = performance.now() + 1900;
+        });
+    },
+
+    tick: function (time) {
+        const t = time / 1000;
+        const talking  = this.data.talking;
+        const greeting = performance.now() < this.greetUntil;
+
+        // Respiración: pulso sutil de todo el torso.
+        if (this.body) {
+            const b = 1 + Math.sin(t * 2.2) * 0.03;
+            this.body.object3D.scale.set(b, 1 / b, b);
+        }
+
+        // Boca.
+        if (this.jaw) {
+            let open;
+            if (talking)      open = (Math.sin(t * 15) * 0.5 + 0.5) * 0.5 + 0.05;
+            else              open = 0.05 + Math.sin(t * 2) * 0.035;
+            this.jaw.object3D.rotation.x = -open;
+        }
+
+        // Brazos / manos.
+        if (this.armL && this.armR) {
+            if (greeting) {
+                // Brazo derecho en alto agitándose; el izquierdo casi quieto.
+                this.armR.object3D.rotation.z = 2.3 + Math.sin(t * 13) * 0.4;
+                this.armL.object3D.rotation.z = -0.12 + Math.sin(t * 2) * 0.05;
+            } else if (talking) {
+                this.armL.object3D.rotation.z = -0.35 + Math.sin(t * 6) * 0.4;
+                this.armR.object3D.rotation.z =  0.35 - Math.sin(t * 6 + 1) * 0.4;
+            } else {
+                this.armL.object3D.rotation.z = -0.08 + Math.sin(t * 1.5) * 0.07;
+                this.armR.object3D.rotation.z =  0.08 - Math.sin(t * 1.5) * 0.07;
+            }
+        }
+
+        // Cabeceo.
+        if (this.head) {
+            this.head.object3D.rotation.z = talking ? Math.sin(t * 4) * 0.06 : Math.sin(t * 1.2) * 0.035;
+        }
+
+        // Orejas.
+        const tw = Math.sin(t * 0.9) * 0.14;
+        if (this.earL) this.earL.object3D.rotation.z =  0.25 + tw;
+        if (this.earR) this.earR.object3D.rotation.z = -0.25 - tw;
+
+        // Cola.
+        if (this.tail) this.tail.object3D.rotation.y = Math.sin(t * 3) * 0.4;
+    }
+});
+
+/* ------------------------------------------------------------------
+   Interacción: al encontrar el marcador, León saluda y lee su
+   diálogo en voz alta (la boca se sincroniza con la duración de la
+   voz). Tocar la pantalla vuelve a dispararlo.
+   ------------------------------------------------------------------ */
+(function () {
+    const DIALOGO =
+        "¡Hola! Soy León, tu guía del colegio. Toca la pantalla y te cuento " +
+        "sobre este lugar mientras muevo las manos y la boca.";
+
+    const hint   = document.getElementById('arHint');
+    const setup  = document.getElementById('arSetup');
+    const scene  = document.querySelector('a-scene');
+    const target = document.getElementById('target');
+    const lion   = document.getElementById('lion');
+
+    let visible = false;
+    let talking = false;
+
+    function setTalking(v) {
+        talking = v;
+        lion.setAttribute('lion-rig', 'talking', v);
+    }
+
+    function speak(text) {
+        if (!('speechSynthesis' in window)) return;
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'es-ES';
+        u.onend = () => setTalking(false);
+        u.onerror = () => setTalking(false);
+        setTalking(true);
+        window.speechSynthesis.speak(u);
+    }
+
+    function greetAndTalk() {
+        lion.emit('lion-greet');
+        speak(DIALOGO);
+    }
+
+    target.addEventListener('targetFound', () => {
+        visible = true;
+        hint.textContent = 'León te saluda 👋 — toca la pantalla para que hable';
+        greetAndTalk();
+    });
+
+    target.addEventListener('targetLost', () => {
+        visible = false;
+        hint.textContent = 'Apunta la cámara al marcador del colegio…';
+        window.speechSynthesis && window.speechSynthesis.cancel();
+        setTalking(false);
+    });
+
+    // Tocar la pantalla: repite saludo + diálogo (solo si el marcador se ve).
+    window.addEventListener('click', () => {
+        if (visible) greetAndTalk();
+    });
+
+    // Aviso si falta el archivo de marcador compilado.
+    fetch('/images/targets.mind', { method: 'HEAD' })
+        .then((r) => { if (!r.ok) setup.classList.add('is-visible'); })
+        .catch(() => setup.classList.add('is-visible'));
+})();
+</script>
+</body>
+</html>

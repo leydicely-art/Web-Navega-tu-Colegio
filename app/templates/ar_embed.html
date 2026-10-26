@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Modo AR</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+          crossorigin="anonymous">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <!-- jsQR: decodifica códigos QR desde los frames de la cámara (ver app/static/ar.js). -->
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+
+    <!-- Import map: necesaria antes de cualquier <script type="module"> que importe "three". -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+
+    <style>
+        /* Versión "embebida" del Modo AR: pensada para vivir dentro del <iframe>
+           de la pestaña Cámara del asistente, sin el header/sidebar del portal. */
+        html, body { height: 100%; background: #10120f; }
+        body { padding: 0; }
+        .ar-embed-wrap { display: flex; flex-direction: column; height: 100%; }
+        .ar-embed-wrap .ar-stage {
+            flex: 1;
+            width: 100%;
+            max-height: none;
+            aspect-ratio: auto;
+            border-radius: 0;
+        }
+        .ar-embed-wrap .ar-panel { margin: 0; border-radius: 0; border-width: 1px 0 0; }
+    </style>
+</head>
+<body>
+
+<div class="ar-embed-wrap">
+    <div class="ar-stage" id="arStage">
+        <video id="arVideo" class="ar-stage__video" autoplay muted playsinline hidden></video>
+        <canvas id="arOverlay" class="ar-stage__overlay"></canvas>
+        <canvas id="arQrCanvas" hidden></canvas>
+
+        <span class="ar-mode-badge" id="arModeBadge" hidden></span>
+        <button type="button" class="ar-reubicar-btn" id="arReubicarBtn" hidden>🔄 Reubicar</button>
+
+        <!-- Ver comentario equivalente en ar.html: botón flotante de voz,
+             visible solo mientras la cámara/AR está activa. -->
+        <button type="button" class="ar-voice-fab" id="arVoiceFab" aria-label="Preguntarle al asistente por voz" hidden>
+            <span class="ar-voice-fab__icon" id="arVoiceFabIcon">🎤</span>
+        </button>
+
+        <!-- Ver comentario equivalente en ar.html: escanear un nuevo QR y
+             reubicar a León (aquí no hay panel con "arRescanBtn" propio, así
+             que este botón flotante es la única forma de hacerlo embebido). -->
+        <button type="button" class="ar-scan-fab" id="arScanFab" aria-label="Escanear un nuevo código QR y reubicar a León" hidden>📷</button>
+
+        <div class="ar-scan-tools" id="arScanTools">
+            <div class="ar-qr-tooltip" id="arQrTooltip" hidden>
+                <span class="ar-qr-tooltip__label">📋 Texto leído del QR</span>
+                <code id="arQrTooltipText" class="ar-qr-tooltip__text"></code>
+                <button type="button" class="ar-qr-tooltip__close" id="arQrTooltipClose" aria-label="Cerrar">✕</button>
+            </div>
+            <div class="ar-hud" id="arHud" hidden></div>
+        </div>
+
+        <div class="ar-error" id="arError" hidden>
+            <span class="ar-error__icon">⚠️</span>
+            <p id="arErrorText"></p>
+            <code id="arErrorDetail" class="ar-error__detail" hidden></code>
+        </div>
+
+        <!-- Ver comentario equivalente en ar.html: toque extra para recuperar
+             la activación del usuario cuando expiró mientras se resolvía el QR. -->
+        <div class="ar-xr-confirm" id="arXrConfirm" hidden>
+            <span class="ar-start__icon">🟢</span>
+            <p>Encontramos AR real para este dispositivo. Tocá para anclar a León al mundo real.</p>
+            <button type="button" class="btn btn-primary" id="arXrConfirmBtn">Anclar en AR real</button>
+        </div>
+    </div>
+
+    <div class="ar-panel" id="arPanel" hidden>
+        <div class="ar-panel__header">
+            <strong id="arPanelNombre"></strong>
+            <span id="arPanelUbicacion" class="text-muted small"></span>
+        </div>
+        <p id="arPanelDialogo" class="ar-panel__dialogo" hidden></p>
+        <span id="arPanelAudio" class="ar-panel__audio" hidden>🔊 Hablando…</span>
+        <button type="button" class="btn btn-outline-primary btn-sm" id="arInteractBtn">✋ Interactuar</button>
+    </div>
+</div>
+
+<script type="module" src="{{ url_for('static', filename='ar.js') }}"></script>
+</body>
+</html>
