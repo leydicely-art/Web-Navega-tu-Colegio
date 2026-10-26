@@ -1,6 +1,7 @@
-"""Conexión a MariaDB y utilidades de inicialización de la base de datos."""
+"""Conexión a PostgreSQL (Supabase) y utilidades de inicialización de la base de datos."""
 
 import os
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, inspect, text
@@ -10,32 +11,33 @@ from app.models import Base
 
 load_dotenv()
 
-DB_USER = os.getenv("DB_USER", "root")
-DB_PASSWORD = os.getenv("DB_PASSWORD", "")
-DB_HOST = os.getenv("DB_HOST", "localhost")
-DB_PORT = os.getenv("DB_PORT", "3306")
-DB_NAME = os.getenv("DB_NAME", "proyect")
 
-DATABASE_URL = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+def _normalizar_url(url: str) -> str:
+    """Adapta una URL de Supabase para SQLAlchemy + psycopg2.
 
-engine = create_engine(DATABASE_URL, echo=False)
+    `pgbouncer=true` es un parámetro de Prisma que psycopg2 no reconoce, así que
+    se elimina de la query string.
+    """
+    partes = urlsplit(url)
+    query = [(k, v) for k, v in parse_qsl(partes.query) if k != "pgbouncer"]
+    return urlunsplit(partes._replace(query=urlencode(query)))
+
+
+# Pooler en modo transacción (puerto 6543): conexiones de la aplicación.
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres@localhost:5432/postgres")
+# Pooler en modo sesión (puerto 5432): creación/migración del esquema.
+DIRECT_URL = os.getenv("DIRECT_URL") or DATABASE_URL
+
+engine = create_engine(_normalizar_url(DATABASE_URL), echo=False, pool_pre_ping=True)
 SessionLocal = sessionmaker(bind=engine)
 
-
-def ensure_database_exists() -> None:
-    server_url = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/"
-    temp_engine = create_engine(server_url)
-    with temp_engine.connect() as conn:
-        conn.execute(text(f"CREATE DATABASE IF NOT EXISTS {DB_NAME} CHARACTER SET utf8mb4"))
-    temp_engine.dispose()
+# Motor para DDL (create_all, ALTER TABLE): va por el pooler en modo sesión.
+schema_engine = create_engine(_normalizar_url(DIRECT_URL), echo=False, pool_pre_ping=True)
 
 
 def drop_database() -> None:
-    server_url = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/"
-    temp_engine = create_engine(server_url)
-    with temp_engine.connect() as conn:
-        conn.execute(text(f"DROP DATABASE IF EXISTS {DB_NAME}"))
-    temp_engine.dispose()
+    """Elimina todas las tablas del proyecto (en Supabase no se borra la base `postgres`)."""
+    Base.metadata.drop_all(schema_engine)
 
 
 def _ensure_columns() -> None:
@@ -45,28 +47,28 @@ def _ensure_columns() -> None:
     una tabla ya creada. Aquí se aplican, de forma idempotente, los ajustes de
     esquema que el proyecto necesita.
     """
-    inspector = inspect(engine)
+    inspector = inspect(schema_engine)
     tablas = set(inspector.get_table_names())
 
     if "ubicacion" in tablas:
         columnas = {col["name"] for col in inspector.get_columns("ubicacion")}
         if "accion" not in columnas:
-            with engine.begin() as conn:
+            with schema_engine.begin() as conn:
                 conn.execute(
                     text("ALTER TABLE ubicacion ADD COLUMN accion VARCHAR(50) NULL")
                 )
         # Coordenadas GPS para el mapa del colegio (/mapa).
         for columna in ("latitud", "longitud"):
             if columna not in columnas:
-                with engine.begin() as conn:
+                with schema_engine.begin() as conn:
                     conn.execute(
-                        text(f"ALTER TABLE ubicacion ADD COLUMN {columna} DOUBLE NULL")
+                        text(f"ALTER TABLE ubicacion ADD COLUMN {columna} DOUBLE PRECISION NULL")
                     )
 
     # El "lugar" del cronograma pasó de texto libre a una ubicación del colegio.
     if "cronograma" in tablas:
         columnas = {col["name"] for col in inspector.get_columns("cronograma")}
-        with engine.begin() as conn:
+        with schema_engine.begin() as conn:
             if "ubicacion_id" not in columnas:
                 conn.execute(
                     text("ALTER TABLE cronograma ADD COLUMN ubicacion_id INT NULL")
@@ -77,7 +79,7 @@ def _ensure_columns() -> None:
     # Los profesores ahora tienen horario de atención y un salón (ubicación).
     if "profesores" in tablas:
         columnas = {col["name"] for col in inspector.get_columns("profesores")}
-        with engine.begin() as conn:
+        with schema_engine.begin() as conn:
             if "horario_atencion" not in columnas:
                 conn.execute(
                     text(
@@ -96,37 +98,39 @@ def _drop_unique_materia_nombre() -> None:
 
     Ahora se permite que dos cursos tengan una materia con el mismo nombre.
     create_all() no elimina índices existentes, así que aquí se busca cualquier
-    índice único que cubra solo la columna `nombre` y se elimina (idempotente).
+    restricción o índice único que cubra solo la columna `nombre` y se elimina
+    (idempotente).
     """
-    inspector = inspect(engine)
+    inspector = inspect(schema_engine)
     if "materias" not in inspector.get_table_names():
         return
 
-    indices = list(inspector.get_indexes("materias"))
-    for restriccion in inspector.get_unique_constraints("materias"):
-        indices.append(
-            {
-                "name": restriccion.get("name"),
-                "unique": True,
-                "column_names": restriccion.get("column_names", []),
-            }
-        )
-
-    nombres_a_borrar = {
+    restricciones = {
+        r["name"]
+        for r in inspector.get_unique_constraints("materias")
+        if r.get("name") and list(r.get("column_names") or []) == ["nombre"]
+    }
+    indices = {
         idx["name"]
-        for idx in indices
+        for idx in inspector.get_indexes("materias")
         if idx.get("name")
         and idx.get("unique")
         and list(idx.get("column_names") or []) == ["nombre"]
+        and idx["name"] not in restricciones
     }
 
-    for nombre_indice in nombres_a_borrar:
-        with engine.begin() as conn:
-            conn.execute(text(f"DROP INDEX `{nombre_indice}` ON `materias`"))
+    with schema_engine.begin() as conn:
+        for nombre in restricciones:
+            conn.execute(text(f'ALTER TABLE materias DROP CONSTRAINT IF EXISTS "{nombre}"'))
+        for nombre in indices:
+            conn.execute(text(f'DROP INDEX IF EXISTS "{nombre}"'))
 
 
 def init_db() -> None:
-    ensure_database_exists()
-    Base.metadata.create_all(engine)
+    if not os.getenv("DATABASE_URL"):
+        raise RuntimeError(
+            "Falta DATABASE_URL: copia .env.example a .env y pon la contraseña de Supabase."
+        )
+    Base.metadata.create_all(schema_engine)
     _ensure_columns()
     _drop_unique_materia_nombre()
